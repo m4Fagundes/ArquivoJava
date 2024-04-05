@@ -16,17 +16,23 @@ public class App {
 
         Pessoa pessoa3 = new Pessoa();
 
-        pessoa3.nome = "Livia";
-        pessoa3.sobrenome = "Camara";
+        pessoa3.nome = "Li";
+        pessoa3.sobrenome = "Cam";
 
-        int id1 = fileTeste.Create(pessoa);
-        int id2 = fileTeste.Create(pessoa2);
-        int id3 = fileTeste.Create(pessoa3);
-        
+        Pessoa pessoa4 = new Pessoa();
+
+        pessoa4.nome = "oi";
+        pessoa4.sobrenome = "oi";
+
+        fileTeste.Create(pessoa);
+        fileTeste.Create(pessoa2);
         fileTeste.delete(2);
+        fileTeste.Create(pessoa3);
+        fileTeste.Create(pessoa4);
+        
 
-        pessoa3.nome = "Teste";
-        pessoa3.sobrenome = "Cabess";
+        pessoa3.nome = "M";
+        pessoa3.sobrenome = "M";
 
 
         fileTeste.Update(pessoa3);
