@@ -39,7 +39,7 @@ public class Arquivo<T extends Registro> {
 
     // Caminhar até o último registro e inseri-lo
     arquivo.seek(arquivo.length());
-    byte[] registro = obj.toByteArray(); //TODO implementar o toByteArray
+    byte[] registro = obj.toByteArray();
     short tamRegistro = (short) registro.length;
     arquivo.writeByte(' ');
     arquivo.writeShort(tamRegistro);
@@ -78,11 +78,11 @@ public class Arquivo<T extends Registro> {
       
     }
   }
-  //TODO erro no update
+
   public void Update(T obj){
     
     int id = obj.getID();
-    System.out.println("O ID e: " + obj.getID());
+    System.out.println("O ID é: " + obj.getID());
     try{
       arquivo.seek(TAM_CABECALHO);
       while(arquivo.getFilePointer() < arquivo.length()){
@@ -114,12 +114,10 @@ public class Arquivo<T extends Registro> {
             arquivo.writeShort(objTam);
             arquivo.write(ba);
           }
-        }
-        else{
+          break;
+        } else{
           arquivo.skipBytes(tamanhoRegistro - 4);
-        
         }
-      
       }
 
     } catch (Exception e){

@@ -26,6 +26,7 @@ public class App {
         fileTeste.delete(2);
 
         pessoa3.nome = "Teste";
+        pessoa3.sobrenome = "Cabess";
 
 
         fileTeste.Update(pessoa3);
