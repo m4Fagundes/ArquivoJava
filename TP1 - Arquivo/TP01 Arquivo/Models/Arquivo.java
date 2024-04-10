@@ -27,7 +27,65 @@ public class Arquivo<T extends Registro> {
     }
   }
 
-  public int Create(T obj) throws Exception {
+  public void Create(T obj) throws Exception{
+    try{
+      arquivo.seek(0);
+      int ultimoID = arquivo.readInt();
+      ultimoID++;
+      arquivo.seek(0);
+      arquivo.writeInt(ultimoID);
+      obj.setID(ultimoID);
+      System.out.println("Este e o id: "+ultimoID);
+
+      boolean spaceFound = false;
+      arquivo.seek(TAM_CABECALHO);
+
+      byte[] regitroOBJ = obj.toByteArray();
+      short tamanhoRegistroNovo = (short) regitroOBJ.length;
+      
+
+      while (arquivo.getFilePointer() < arquivo.length()) {
+
+        long lapidePosition = arquivo.getFilePointer();
+        byte lapideValor = arquivo.readByte();
+        short tamanhoRegistroAtual = arquivo.readShort();
+        
+
+        if(lapideValor == '*'){
+          if(tamanhoRegistroAtual >= tamanhoRegistroNovo){
+
+            arquivo.seek(lapidePosition);
+            arquivo.writeByte(' ');
+            arquivo.writeShort(tamanhoRegistroNovo);
+            arquivo.write(regitroOBJ);
+            spaceFound = true;
+            System.out.println("Registro reaproveitado: ");
+            break;
+          } 
+        } else{
+          arquivo.skipBytes(tamanhoRegistroAtual);
+        }
+      }
+
+      if(spaceFound == false){
+        arquivo.seek(arquivo.length());
+        arquivo.writeByte(' ');
+        arquivo.writeShort(tamanhoRegistroNovo);
+        arquivo.write(regitroOBJ);
+      }
+
+    } catch (Exception e){
+        System.out.println("Ocorreu um excecao: " + e);
+    }
+  }
+
+
+
+
+
+
+
+  public int Createe(T obj) throws Exception {
     // Pegar e setar o ID no objeto
     arquivo.seek(0);
     int ultimoID = arquivo.readInt();
@@ -39,7 +97,7 @@ public class Arquivo<T extends Registro> {
 
     // Caminhar até o último registro e inseri-lo
     arquivo.seek(arquivo.length());
-    byte[] registro = obj.toByteArray(); //TODO implementar o toByteArray
+    byte[] registro = obj.toByteArray();
     short tamRegistro = (short) registro.length;
     arquivo.writeByte(' ');
     arquivo.writeShort(tamRegistro);
@@ -78,11 +136,10 @@ public class Arquivo<T extends Registro> {
       
     }
   }
-  //TODO erro no update
+
   public void Update(T obj){
     
     int id = obj.getID();
-    System.out.println("O ID e: " + obj.getID());
     try{
       arquivo.seek(TAM_CABECALHO);
       while(arquivo.getFilePointer() < arquivo.length()){
@@ -98,11 +155,12 @@ public class Arquivo<T extends Registro> {
         int idAtual = arquivo.readInt();
         
 
-        if(idAtual == id && lapide != '*'){
+        if(idAtual == id && lapideValor == ' '){
           arquivo.seek(lapide);
 
           if(tamanhoRegistro >= objTam){
 
+              arquivo.writeByte(' ');
               arquivo.writeShort(objTam);
               arquivo.write(ba);
 
@@ -114,12 +172,10 @@ public class Arquivo<T extends Registro> {
             arquivo.writeShort(objTam);
             arquivo.write(ba);
           }
-        }
-        else{
+          break;
+        } else{
           arquivo.skipBytes(tamanhoRegistro - 4);
-        
         }
-      
       }
 
     } catch (Exception e){
