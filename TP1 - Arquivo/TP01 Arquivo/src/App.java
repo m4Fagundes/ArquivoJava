@@ -30,7 +30,7 @@ public class App {
 
         fileTeste.Update(pessoa3);
 
-        fileTeste.close(); 
+        fileTeste.close();
         
     }
 }
