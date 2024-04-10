@@ -1,18 +1,47 @@
-## Getting Started
+Banco de Dados em Java
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Este projeto implementa um banco de dados manual em Java, desenvolvido como parte das atividades da disciplina de Algoritmos e Estruturas de Dados III. O banco de dados armazena informações de maneira inteligente, utilizando métodos Create, Update e Delete, e inclui o reaproveitamento de espaço para otimização do armazenamento.
+Funcionalidades
 
-## Folder Structure
+-    Criar novos registros
+-    Atualizar registros existentes
+-    Excluir registros
+-    Reaproveitar espaço liberado por registros excluídos
 
-The workspace contains two folders by default, where:
+Desenvolvimento
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+O projeto foi desenvolvido de forma totalmente autoral, baseado apenas no conhecimento lógico adquirido nas aulas da disciplina. O código do professor não foi utilizado, demonstrando a aplicação prática dos conceitos aprendidos.
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+Respondendo as Perguntas
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+O que você considerou como perda aceitável para o reuso de espaços vazios, isto é, quais são os critérios para a gestão dos espaços vazios?
+  - Se o espaço tiver marcado como lapide toda vez que um novo registro e colocado no arquivo, é verificado se em algum dos espaços vazios é possível de ser armazenado.
 
-## Dependency Management
+O código do CRUD com arquivos de tipos genéricos está funcionando corretamente?
+  - Sim o CRUD funciona corretamente para o tipo de dados genérico.
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+O CRUD tem um índice direto implementado com a tabela hash extensível?
+  - Não.... ainda, de forma que o arquivo para qual implementamos fora um Arquivo Sequencial.
+
+A operação de inclusão busca o espaço vazio mais adequado para o novo registro antes de acrescentá-lo ao fim do arquivo?
+  - A operação de inclusão busca um espaço válido para que o registro seja colocado, ou seja, verifica se o tamanho de bytes após uma lápide marcada seja suficiente para recebet o novo registro.
+
+A operação de alteração busca o espaço vazio mais adequado para o registro quando ele cresce de tamanho antes de acrescentá-lo ao fim do arquivo?
+  - Sim!
+
+As operações de alteração (quando for o caso) e de exclusão estão gerenciando os espaços vazios para que possam ser reaproveitados?
+  - Sim, ambas quando marcado lapide no registro, criam-se espaços para armazenamentos posteriores.
+
+O trabalho está funcionando corretamente?
+  - Sim, o trabalho esta funcionando perfeitamente, reaproveitando espaços vazios como foi solicitado na atividade.
+  
+O trabalho está completo?
+  - Sim, o trabalho atende ao exigido no enunciado.
+  
+O trabalho é original e não a cópia de um trabalho de um colega?
+  - Sim o trabalho e 100% original, feito baseado apenas nos conhecimentos adquiridos na diciplina.
+
+Criadores/Colaboradores
+
+Matheus Fagundes
+Luca Lourenço
