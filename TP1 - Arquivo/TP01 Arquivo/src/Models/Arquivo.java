@@ -79,33 +79,6 @@ public class Arquivo<T extends Registro> {
     }
   }
 
-
-
-
-
-
-
-  public int Createe(T obj) throws Exception {
-    // Pegar e setar o ID no objeto
-    arquivo.seek(0);
-    int ultimoID = arquivo.readInt();
-    ultimoID++;
-    arquivo.seek(0);
-    arquivo.writeInt(ultimoID);
-    
-    obj.setID(ultimoID);
-
-    // Caminhar até o último registro e inseri-lo
-    arquivo.seek(arquivo.length());
-    byte[] registro = obj.toByteArray();
-    short tamRegistro = (short) registro.length;
-    arquivo.writeByte(' ');
-    arquivo.writeShort(tamRegistro);
-    arquivo.write(registro);
-      
-      return ultimoID;
-  }
-
   public void delete(int id){
    
     try{
