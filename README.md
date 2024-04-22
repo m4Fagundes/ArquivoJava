@@ -21,7 +21,7 @@ O código do CRUD com arquivos de tipos genéricos está funcionando corretament
   - Sim o CRUD funciona corretamente para o tipo de dados genérico.
 
 O CRUD tem um índice direto implementado com a tabela hash extensível?
-  - Não.... ainda, de forma que o arquivo para qual implementamos fora um Arquivo Sequencial.
+  - Não.... ainda, da forma que o arquivo para qual implementamos fora um Arquivo Sequencial.
 
 A operação de inclusão busca o espaço vazio mais adequado para o novo registro antes de acrescentá-lo ao fim do arquivo?
   - A operação de inclusão busca um espaço válido para que o registro seja colocado, ou seja, verifica se o tamanho de bytes após uma lápide marcada seja suficiente para recebet o novo registro.
