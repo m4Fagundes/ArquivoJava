@@ -1,22 +1,28 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
+/**
+ * Classe genérica Arquivo para manipulação de registros de arquivo.
+ * 
+ * @param <T> Tipo do registro que estende a interface Registro.
+ *          Esta classe assume que T pode ser serializado e deserializado
+ *          através de um array de bytes.
+ */
 public class Arquivo<T extends Registro> {
 
-  protected RandomAccessFile arquivo;
-  protected Constructor<T> construtor;
-  final protected int TAM_CABECALHO = 4;
+  protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
+  protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
+  final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
 
+  /**
+   * Constrói um arquivo que manipula registros do tipo T.
+   * O arquivo é criado ou aberto como leitura e escrita ('rw').
+   * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
+   *
+   * @param c Construtor da classe T.
+   * @throws Exception Se ocorrer um erro ao acessar o arquivo.
+   */
   public Arquivo(Constructor<T> c) throws Exception {
 
     this.construtor = c;
@@ -27,6 +33,14 @@ public class Arquivo<T extends Registro> {
     }
   }
 
+      /**
+     * Cria um novo registro no arquivo.
+     * Incrementa o último ID usado, salva o novo ID no objeto e no arquivo,
+     * e escreve o objeto serializado no arquivo, reutilizando espaço de registros deletados se possível.
+     *
+     * @param obj Instância de T para ser armazenada no arquivo.
+     * @throws Exception Se ocorrer um erro durante escrita no arquivo.
+     */
   public void Create(T obj) throws Exception{
     try{
       arquivo.seek(0);
@@ -79,6 +93,11 @@ public class Arquivo<T extends Registro> {
     }
   }
 
+   /**
+   * Apaga um registro pelo ID marcando seu espaço como deletado (lapide '*').
+   *
+   * @param id ID do registro a ser deletado.
+   */
   public void delete(int id){
    
     try{
@@ -110,6 +129,12 @@ public class Arquivo<T extends Registro> {
     }
   }
 
+
+  /**
+  * Atualiza um registro no arquivo substituindo o antigo por um novo
+  * se o espaço for suficiente, ou escrevendo ao final do arquivo se necessário.     * 
+  * @param obj Registro a ser atualizado.
+  */
   public void Update(T obj){
     
     int id = obj.getID();
@@ -158,6 +183,15 @@ public class Arquivo<T extends Registro> {
     
   }
 
+
+  /**
+  * Lê e deserializa um registro pelo ID.
+  * Retorna null se o registro não for encontrado ou se estiver marcado como deletado.
+  * 
+  * @param id ID do registro a ser lido.
+  * @return Uma instância de T se encontrado, null caso contrário.
+  * @throws Exception Se ocorrer erro ao ler o arquivo.
+  */
   public T read(int id) throws Exception{
     
     arquivo.seek(TAM_CABECALHO);
@@ -188,6 +222,10 @@ public class Arquivo<T extends Registro> {
     return null;
   }
 
+  /**
+  * Fecha o arquivo de registros.
+  * Deve ser chamado para garantir que todas as alterações sejam salvas.
+  */
   public void close() {
     try {
       if (arquivo != null) {
