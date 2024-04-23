@@ -1,3 +1,4 @@
+package models;
 import java.io.*;
 
 // Descricao dos metodos genericos na interface @Registro

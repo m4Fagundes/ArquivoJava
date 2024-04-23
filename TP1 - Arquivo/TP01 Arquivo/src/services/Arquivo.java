@@ -1,6 +1,8 @@
+package services;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
+import models.*;
 
 /**
 * Classe genérica Arquivo para manipulação de registros de arquivo.
