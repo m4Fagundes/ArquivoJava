@@ -1,5 +1,6 @@
 import java.io.*;
 
+// Descricao dos metodos genericos na interface @Registro
 public class Pessoa implements Registro {
 
     private int ID;
@@ -39,11 +40,11 @@ public class Pessoa implements Registro {
         DataInputStream dataInputStream = new DataInputStream(baInputStream);
 
         try {
-            this.ID = dataInputStream.readInt();                // Lê o ID
-            this.nome = dataInputStream.readUTF();              // Lê o nome
-            this.sobrenome = dataInputStream.readUTF();         // Lê o sobrenome
+            this.ID = dataInputStream.readInt();                
+            this.nome = dataInputStream.readUTF();              
+            this.sobrenome = dataInputStream.readUTF();         
         } finally {
-            dataInputStream.close();                            // Fecha o stream para liberar recursos
+            dataInputStream.close();                        
         }
     }
 
