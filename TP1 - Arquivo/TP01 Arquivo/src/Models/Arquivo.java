@@ -3,26 +3,27 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 
 /**
- * Classe genérica Arquivo para manipulação de registros de arquivo.
- * 
- * @param <T> Tipo do registro que estende a interface Registro.
- *          Esta classe assume que T pode ser serializado e deserializado
- *          através de um array de bytes.
- */
+* Classe genérica Arquivo para manipulação de registros de arquivo.
+* 
+* @param <T> Tipo do registro que estende a interface Registro.
+*          Esta classe assume que T pode ser serializado e deserializado
+*          através de um array de bytes.
+*/
 public class Arquivo<T extends Registro> {
 
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
 
+
   /**
-   * Constrói um arquivo que manipula registros do tipo T.
-   * O arquivo é criado ou aberto como leitura e escrita ('rw').
-   * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
-   *
-   * @param c Construtor da classe T.
-   * @throws Exception Se ocorrer um erro ao acessar o arquivo.
-   */
+  * Constrói um arquivo que manipula registros do tipo T.
+  * O arquivo é criado ou aberto como leitura e escrita ('rw').
+  * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
+  *
+  * @param c Construtor da classe T.
+  * @throws Exception Se ocorrer um erro ao acessar o arquivo.
+  */
   public Arquivo(Constructor<T> c) throws Exception {
 
     this.construtor = c;
@@ -33,14 +34,15 @@ public class Arquivo<T extends Registro> {
     }
   }
 
-      /**
-     * Cria um novo registro no arquivo.
-     * Incrementa o último ID usado, salva o novo ID no objeto e no arquivo,
-     * e escreve o objeto serializado no arquivo, reutilizando espaço de registros deletados se possível.
-     *
-     * @param obj Instância de T para ser armazenada no arquivo.
-     * @throws Exception Se ocorrer um erro durante escrita no arquivo.
-     */
+
+  /**
+  * Cria um novo registro no arquivo.
+  * Incrementa o último ID usado, salva o novo ID no objeto e no arquivo,
+  * e escreve o objeto serializado no arquivo, reutilizando espaço de registros deletados se possível.
+  *
+  * @param obj Instância de T para ser armazenada no arquivo.
+  * @throws Exception Se ocorrer um erro durante escrita no arquivo.
+  */
   public void Create(T obj) throws Exception{
     try{
       arquivo.seek(0);
@@ -92,12 +94,13 @@ public class Arquivo<T extends Registro> {
         System.out.println("Ocorreu um excecao: " + e);
     }
   }
+  
 
-   /**
-   * Apaga um registro pelo ID marcando seu espaço como deletado (lapide '*').
-   *
-   * @param id ID do registro a ser deletado.
-   */
+  /**
+  * Apaga um registro pelo ID marcando seu espaço como deletado (lapide '*').
+  *
+  * @param id ID do registro a ser deletado.
+  */
   public void delete(int id){
    
     try{
@@ -221,6 +224,7 @@ public class Arquivo<T extends Registro> {
     }
     return null;
   }
+
 
   /**
   * Fecha o arquivo de registros.
