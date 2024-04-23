@@ -1,6 +1,5 @@
 public class App {
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
 
         Arquivo<Pessoa> fileTeste = new Arquivo<>(Pessoa.class.getConstructor());
         
@@ -16,13 +15,13 @@ public class App {
 
         Pessoa pessoa3 = new Pessoa();
 
-        pessoa3.nome = "Li";
-        pessoa3.sobrenome = "Cam";
+        pessoa3.nome = "Liz";
+        pessoa3.sobrenome = "Usa";
 
         Pessoa pessoa4 = new Pessoa();
 
-        pessoa4.nome = "oi";
-        pessoa4.sobrenome = "oi";
+        pessoa4.nome = "Iam";
+        pessoa4.sobrenome = "Chevrand";
 
         fileTeste.Create(pessoa);
         fileTeste.Create(pessoa2);
@@ -31,11 +30,17 @@ public class App {
         fileTeste.Create(pessoa4);
         
 
-        pessoa3.nome = "M";
-        pessoa3.sobrenome = "M";
+        pessoa3.nome = "Luana";
+        pessoa3.sobrenome = "Cunha";
 
+        Pessoa pessoaRead = new Pessoa();
 
         fileTeste.Update(pessoa3);
+        pessoaRead = fileTeste.read(1);
+
+        fileTeste.Create(pessoaRead);
+        System.out.println("O nome e : " + pessoaRead.nome + pessoaRead.sobrenome);
+
 
         fileTeste.close();
         

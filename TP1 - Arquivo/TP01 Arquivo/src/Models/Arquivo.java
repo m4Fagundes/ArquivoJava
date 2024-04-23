@@ -35,7 +35,7 @@ public class Arquivo<T extends Registro> {
       arquivo.seek(0);
       arquivo.writeInt(ultimoID);
       obj.setID(ultimoID);
-      System.out.println("Este e o id: "+ultimoID);
+      //System.out.println("Este e o id: "+ultimoID);
 
       boolean spaceFound = false;
       arquivo.seek(TAM_CABECALHO);
@@ -59,7 +59,7 @@ public class Arquivo<T extends Registro> {
             arquivo.writeShort(tamanhoRegistroNovo);
             arquivo.write(regitroOBJ);
             spaceFound = true;
-            System.out.println("Registro reaproveitado: ");
+            //System.out.println("Registro reaproveitado: ");
             break;
           } 
         } else{
@@ -91,7 +91,7 @@ public class Arquivo<T extends Registro> {
         short tamanhoRegistro = arquivo.readShort();
   
         int idAtual = arquivo.readInt();
-        System.out.println(idAtual);
+        //System.out.println(idAtual);
 
         if(idAtual == id){
           arquivo.seek(lapide);
@@ -117,8 +117,8 @@ public class Arquivo<T extends Registro> {
       arquivo.seek(TAM_CABECALHO);
       while(arquivo.getFilePointer() < arquivo.length()){
 
-        byte[] ba = obj.toByteArray();
-        short objTam = (short) ba.length;
+        byte[] registroObj = obj.toByteArray();
+        short objTam = (short) registroObj.length;
 
 
         long lapide = arquivo.getFilePointer();
@@ -135,7 +135,7 @@ public class Arquivo<T extends Registro> {
 
               arquivo.writeByte(' ');
               arquivo.writeShort(objTam);
-              arquivo.write(ba);
+              arquivo.write(registroObj);
 
           } else {
             arquivo.seek(lapide);
@@ -143,7 +143,7 @@ public class Arquivo<T extends Registro> {
             arquivo.seek(arquivo.length());
             arquivo.writeByte(' ');
             arquivo.writeShort(objTam);
-            arquivo.write(ba);
+            arquivo.write(registroObj);
           }
           break;
         } else{
@@ -156,6 +156,36 @@ public class Arquivo<T extends Registro> {
       
     }
     
+  }
+
+  public T read(int id) throws Exception{
+    
+    arquivo.seek(TAM_CABECALHO);
+    T obj = construtor.newInstance();
+
+    while (arquivo.getFilePointer() < arquivo.length()) {
+
+      long lapide = arquivo.getFilePointer();
+      byte lapideValor = arquivo.readByte();
+      short tamanhoRegistro = arquivo.readShort();
+      byte[] registro; 
+
+      int index = arquivo.readInt();
+      arquivo.seek(lapide);
+      arquivo.readByte();
+      arquivo.readShort();
+
+      if(index == id && lapideValor != '*'){
+        System.out.println(tamanhoRegistro);
+        registro = new byte[tamanhoRegistro];
+        arquivo.read(registro,0,tamanhoRegistro);
+        obj.fromByteArray(registro);
+        return obj;
+      } else{
+        arquivo.skipBytes(tamanhoRegistro);
+      }
+    }
+    return null;
   }
 
   public void close() {

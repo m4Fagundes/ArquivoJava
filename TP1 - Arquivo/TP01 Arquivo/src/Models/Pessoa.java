@@ -34,12 +34,17 @@ public class Pessoa implements Registro {
     }
 
     @Override
-    public void fromByteArray(byte ba[]) throws Exception {
-        ByteArrayInputStream ba_in = new ByteArrayInputStream(ba);
-        DataInputStream dis = new DataInputStream(ba_in);
-        this.ID = dis.readInt();
-        this.nome = dis.readUTF();
-        this.sobrenome = dis.readUTF();
+    public void fromByteArray(byte[] registro) throws IOException {
+        ByteArrayInputStream baInputStream = new ByteArrayInputStream(registro);
+        DataInputStream dataInputStream = new DataInputStream(baInputStream);
+
+        try {
+            this.ID = dataInputStream.readInt();                // Lê o ID
+            this.nome = dataInputStream.readUTF();              // Lê o nome
+            this.sobrenome = dataInputStream.readUTF();         // Lê o sobrenome
+        } finally {
+            dataInputStream.close();                            // Fecha o stream para liberar recursos
+        }
     }
 
     @Override
