@@ -24,7 +24,6 @@ public class Arquivo<T extends Registro> {
   * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
   *
   * @param c Construtor da classe T.
-  * @throws Exception Se ocorrer um erro ao acessar o arquivo.
   */
   public Arquivo(Constructor<T> c) throws Exception {
 
@@ -43,7 +42,6 @@ public class Arquivo<T extends Registro> {
   * e escreve o objeto serializado no arquivo, reutilizando espaço de registros deletados se possível.
   *
   * @param obj Instância de T para ser armazenada no arquivo.
-  * @throws Exception Se ocorrer um erro durante escrita no arquivo.
   */
   public void Create(T obj) throws Exception{
     try{
@@ -195,7 +193,6 @@ public class Arquivo<T extends Registro> {
   * 
   * @param id ID do registro a ser lido.
   * @return Uma instância de T se encontrado, null caso contrário.
-  * @throws Exception Se ocorrer erro ao ler o arquivo.
   */
   public T read(int id) throws Exception{
     
