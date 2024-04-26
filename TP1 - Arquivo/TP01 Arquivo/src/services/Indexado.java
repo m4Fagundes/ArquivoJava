@@ -30,4 +30,8 @@ public class Indexado <T extends Registro>{
         return id;
         
     }
+
+    public T read(int id){
+        //TODO fazer a classe read
+    }
 }
