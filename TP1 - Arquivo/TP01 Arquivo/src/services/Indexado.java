@@ -31,7 +31,9 @@ public class Indexado <T extends Registro>{
         
     }
 
-    public T read(int id){
+    public T read(int id)throws Exception{
         //TODO fazer a classe read
+        T obj = construtor.newInstance();
+        return obj;
     }
 }
