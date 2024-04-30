@@ -2,6 +2,8 @@ package services;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
+
 import models.*;
 
 /**
@@ -16,6 +18,7 @@ public class Arquivo<T extends Registro> {
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
+  HashMap<Integer, Long> index = new HashMap<>();  //Tabela hash de indexacao para pesquisa
 
 
   /**
@@ -59,6 +62,8 @@ public class Arquivo<T extends Registro> {
       byte[] regitroOBJ = obj.toByteArray();
       short tamanhoRegistroNovo = (short) regitroOBJ.length;
       
+      long endereço = arquivo.getFilePointer();
+      index.put(ultimoID, endereço);
 
       while (arquivo.getFilePointer() < arquivo.length()) {
 
@@ -106,25 +111,37 @@ public class Arquivo<T extends Registro> {
     try{
       // Primeiro temos que salvar o endereço da lapide e caminhar até o 
       arquivo.seek(TAM_CABECALHO);
-      while(arquivo.getFilePointer() < arquivo.length()){
 
-        long lapide = arquivo.getFilePointer();
-        arquivo.readByte();
-        short tamanhoRegistro = arquivo.readShort();
-  
-        int idAtual = arquivo.readInt();
-        //System.out.println(idAtual);
+      Long enderecoValorADeletar = index.get(id);
 
-        if(idAtual == id){
-          arquivo.seek(lapide);
-          arquivo.writeByte('*');
-        }
-        else{
-          arquivo.skipBytes(tamanhoRegistro - 4);
-        
-        }
-      
+      if(enderecoValorADeletar == null){
+        System.out.println("Valor não encontrado");
+        return;
+      } else{
+        arquivo.seek(enderecoValorADeletar);
+        arquivo.writeByte('*');
+        index.remove(enderecoValorADeletar);
       }
+
+      // while(arquivo.getFilePointer() < arquivo.length()){
+
+      //   long lapide = arquivo.getFilePointer();
+      //   arquivo.readByte();
+      //   short tamanhoRegistro = arquivo.readShort();
+  
+      //   int idAtual = arquivo.readInt();
+      //   //System.out.println(idAtual);
+
+      //   if(idAtual == id){
+      //     arquivo.seek(lapide);
+      //     arquivo.writeByte('*');
+      //   }
+      //   else{
+      //     arquivo.skipBytes(tamanhoRegistro - 4);
+        
+      //   }
+      
+      // }
 
     } catch (Exception e){
       System.out.println("Ocorreu uma excessao: "+ e);
@@ -143,41 +160,73 @@ public class Arquivo<T extends Registro> {
     int id = obj.getID();
     try{
       arquivo.seek(TAM_CABECALHO);
-      while(arquivo.getFilePointer() < arquivo.length()){
+
+
+      Long enderecoOBJ = index.get(obj.getID());
+
+      if(enderecoOBJ == null){
+        System.out.println("Objeto não encontrado");
+        return;
+      } else{
 
         byte[] registroObj = obj.toByteArray();
         short objTam = (short) registroObj.length;
 
+        arquivo.seek(enderecoOBJ);
+        arquivo.readByte();
+        short tamRegistro = arquivo.readShort();
 
-        long lapide = arquivo.getFilePointer();
-        byte lapideValor = arquivo.readByte();
-        short tamanhoRegistro = arquivo.readShort();
-        
-        int idAtual = arquivo.readInt();
-        
+        if(tamRegistro >= objTam){
 
-        if(idAtual == id && lapideValor == ' '){
-          arquivo.seek(lapide);
+          arquivo.writeByte(' ');
+          arquivo.writeShort(objTam);
+          arquivo.write(registroObj);
 
-          if(tamanhoRegistro >= objTam){
-
-              arquivo.writeByte(' ');
-              arquivo.writeShort(objTam);
-              arquivo.write(registroObj);
-
-          } else {
-            arquivo.seek(lapide);
-            arquivo.writeByte('*');
-            arquivo.seek(arquivo.length());
-            arquivo.writeByte(' ');
-            arquivo.writeShort(objTam);
-            arquivo.write(registroObj);
-          }
-          break;
-        } else{
-          arquivo.skipBytes(tamanhoRegistro - 4);
+        } else {
+          arquivo.seek(enderecoOBJ);
+          arquivo.writeByte('*');
+          arquivo.seek(arquivo.length());
+          arquivo.writeByte(' ');
+          arquivo.writeShort(objTam);
+          arquivo.write(registroObj);
         }
+
       }
+      // while(arquivo.getFilePointer() < arquivo.length()){
+
+      //   byte[] registroObj = obj.toByteArray();
+      //   short objTam = (short) registroObj.length;
+
+
+      //   long lapide = arquivo.getFilePointer();
+      //   byte lapideValor = arquivo.readByte();
+      //   short tamanhoRegistro = arquivo.readShort();
+        
+      //   int idAtual = arquivo.readInt();
+        
+
+      //   if(idAtual == id && lapideValor == ' '){
+      //     arquivo.seek(lapide);
+
+      //     if(tamanhoRegistro >= objTam){
+
+      //         arquivo.writeByte(' ');
+      //         arquivo.writeShort(objTam);
+      //         arquivo.write(registroObj);
+
+      //     } else {
+      //       arquivo.seek(lapide);
+      //       arquivo.writeByte('*');
+      //       arquivo.seek(arquivo.length());
+      //       arquivo.writeByte(' ');
+      //       arquivo.writeShort(objTam);
+      //       arquivo.write(registroObj);
+      //     }
+      //     break;
+      //   } else{
+      //     arquivo.skipBytes(tamanhoRegistro - 4);
+      //   }
+      // }
 
     } catch (Exception e){
       System.out.println("Ocorreu uma excessao: "+ e);
@@ -199,29 +248,47 @@ public class Arquivo<T extends Registro> {
     arquivo.seek(TAM_CABECALHO);
     T obj = construtor.newInstance();
 
-    while (arquivo.getFilePointer() < arquivo.length()) {
-
-      long lapide = arquivo.getFilePointer();
-      byte lapideValor = arquivo.readByte();
-      short tamanhoRegistro = arquivo.readShort();
-      byte[] registro; 
-
-      int index = arquivo.readInt();
-      arquivo.seek(lapide);
-      arquivo.readByte();
-      arquivo.readShort();
-
-      if(index == id && lapideValor != '*'){
-        System.out.println(tamanhoRegistro);
-        registro = new byte[tamanhoRegistro];
+    Long enderecoLeitura = index.get(id);
+    if(enderecoLeitura == null){
+      System.out.println("Objeto não encontrado para a leitura");
+      return null;
+    } else{
+      arquivo.seek(enderecoLeitura);
+      byte lapide = arquivo.readByte();
+      if(lapide == ' '){
+        short tamanhoRegistro = arquivo.readShort();
+        byte[] registro = new byte[tamanhoRegistro];
         arquivo.read(registro,0,tamanhoRegistro);
         obj.fromByteArray(registro);
         return obj;
       } else{
-        arquivo.skipBytes(tamanhoRegistro);
+        System.out.println("O livro não está presente no acervo");
+        return null;
       }
     }
-    return null;
+    // while (arquivo.getFilePointer() < arquivo.length()) {
+
+    //   long lapide = arquivo.getFilePointer();
+    //   byte lapideValor = arquivo.readByte();
+    //   short tamanhoRegistro = arquivo.readShort();
+    //   byte[] registro; 
+
+    //   int index = arquivo.readInt();
+    //   arquivo.seek(lapide);
+    //   arquivo.readByte();
+    //   arquivo.readShort();
+
+    //   if(index == id && lapideValor != '*'){
+    //     System.out.println(tamanhoRegistro);
+    //     registro = new byte[tamanhoRegistro];
+    //     arquivo.read(registro,0,tamanhoRegistro);
+    //     obj.fromByteArray(registro);
+    //     return obj;
+    //   } else{
+    //     arquivo.skipBytes(tamanhoRegistro);
+    //   }
+    // }
+    // return null;
   }
 
 

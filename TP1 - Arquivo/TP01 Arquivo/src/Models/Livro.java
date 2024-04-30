@@ -2,11 +2,11 @@ package models;
 import java.io.*;
 
 // Descricao dos metodos genericos na interface @Registro
-public class Pessoa implements Registro {
+public class Livro implements Registro {
 
     private int ID;
     public String nome;
-    public String sobrenome;
+    public String altor;
 
     @Override
     public int compareTo(Object o) {
@@ -30,7 +30,7 @@ public class Pessoa implements Registro {
         DataOutputStream dos = new DataOutputStream(ba_out);
         dos.writeInt(this.ID);
         dos.writeUTF(nome);
-        dos.writeUTF(sobrenome);
+        dos.writeUTF(altor);
 
         return ba_out.toByteArray();
     }
@@ -43,7 +43,7 @@ public class Pessoa implements Registro {
         try {
             this.ID = dataInputStream.readInt();                
             this.nome = dataInputStream.readUTF();              
-            this.sobrenome = dataInputStream.readUTF();         
+            this.altor = dataInputStream.readUTF();         
         } finally {
             dataInputStream.close();                        
         }

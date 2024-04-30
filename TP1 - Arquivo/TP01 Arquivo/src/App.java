@@ -5,45 +5,45 @@ import services.*;
 public class App {
     public static void main(String[] args) throws Exception {
 
-        Arquivo<Pessoa> fileTeste = new Arquivo<>(Pessoa.class.getConstructor());
+        Arquivo<Livro> fileTeste = new Arquivo<>(Livro.class.getConstructor());
         
-        Pessoa pessoa = new Pessoa();
+        Livro livro = new Livro();
 
-        pessoa.nome = "Matheus";
-        pessoa.sobrenome = "Fagundes";
+        livro.nome = "Cleam Code";
+        livro.altor = "Robert C. Martins";
 
-        Pessoa pessoa2 = new Pessoa();
+        Livro livro2 = new Livro();
 
-        pessoa2.nome = "Luca";
-        pessoa2.sobrenome = "Lourenco";
+        livro.nome = "Scrum a Arte de Fazer o Dobro em Metade do Tempo";
+        livro.altor = "Jeff Sutherland";
 
-        Pessoa pessoa3 = new Pessoa();
+        Livro livro3 = new Livro();
 
-        pessoa3.nome = "Liz";
-        pessoa3.sobrenome = "Usa";
+        livro3.nome = "Cleam Architecture";
+        livro3.altor = "Robert C. Martin";
 
-        Pessoa pessoa4 = new Pessoa();
+        Livro pessoa4 = new Livro();
 
-        pessoa4.nome = "Iam";
-        pessoa4.sobrenome = "Chevrand";
+        pessoa4.nome = "O Universo em uma Casca de Nós";
+        pessoa4.altor = "Stephen Hawking";
 
-        fileTeste.Create(pessoa);
-        fileTeste.Create(pessoa2);
+        fileTeste.Create(livro);
+        fileTeste.Create(livro2);
         fileTeste.delete(2);
-        fileTeste.Create(pessoa3);
+        fileTeste.Create(livro2);
         fileTeste.Create(pessoa4);
         
 
-        pessoa3.nome = "Luana";
-        pessoa3.sobrenome = "Cunha";
+        livro3.nome = "Como Programar Java";
+        livro3.altor = "Paul Deitel";
 
-        Pessoa pessoaRead = new Pessoa();
+        Livro livroRead = new Livro();
 
-        fileTeste.Update(pessoa3);
-        pessoaRead = fileTeste.read(1);
+        fileTeste.Update(livro3);
+        livroRead = fileTeste.read(1);
 
-        fileTeste.Create(pessoaRead);
-        System.out.println("O nome e : " + pessoaRead.nome + pessoaRead.sobrenome);
+        fileTeste.Create(livroRead);
+        System.out.println("O nome do livro é : " + livroRead.nome + livroRead.altor);
 
 
         fileTeste.close();
