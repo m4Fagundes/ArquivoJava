@@ -1,33 +1,34 @@
 package services;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 import models.*;
 
 /**
-* Classe genérica Arquivo para manipulação de registros de arquivo.
-* 
-* @param <T> Tipo do registro que estende a interface Registro.
-*          Esta classe assume que T pode ser serializado e deserializado
-*          através de um array de bytes.
-*/
+ * Classe genérica Arquivo para manipulação de registros de arquivo.
+ * 
+ * @param <T> Tipo do registro que estende a interface Registro.
+ *            Esta classe assume que T pode ser serializado e deserializado
+ *            através de um array de bytes.
+ */
 public class Arquivo<T extends Registro> {
 
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
-  HashMap<Integer, Long> index = new HashMap<>();  //Tabela hash de indexacao para pesquisa
-
+  HashMap<Integer, Long> index = new HashMap<>(); // Tabela hash de indexacao para pesquisa
 
   /**
-  * Constrói um arquivo que manipula registros do tipo T.
-  * O arquivo é criado ou aberto como leitura e escrita ('rw').
-  * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
-  *
-  * @param c Construtor da classe T.
-  */
+   * Constrói um arquivo que manipula registros do tipo T.
+   * O arquivo é criado ou aberto como leitura e escrita ('rw').
+   * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
+   *
+   * @param c Construtor da classe T.
+   */
   public Arquivo(Constructor<T> c) throws Exception {
 
     this.construtor = c;
@@ -38,264 +39,167 @@ public class Arquivo<T extends Registro> {
     }
   }
 
-
   /**
-  * Cria um novo registro no arquivo.
-  * Incrementa o último ID usado, salva o novo ID no objeto e no arquivo,
-  * e escreve o objeto serializado no arquivo, reutilizando espaço de registros deletados se possível.
-  *
-  * @param obj Instância de T para ser armazenada no arquivo.
-  */
-  public void Create(T obj) throws Exception{
-    try{
-      arquivo.seek(0);
-      int ultimoID = arquivo.readInt();
-      ultimoID++;
-      arquivo.seek(0);
-      arquivo.writeInt(ultimoID);
-      obj.setID(ultimoID);
-      //System.out.println("Este e o id: "+ultimoID);
+   * Cria um novo registro no arquivo.
+   * Incrementa o último ID usado, salva o novo ID no objeto e no arquivo,
+   * e escreve o objeto serializado no arquivo, reutilizando espaço de registros
+   * deletados se possível.
+   *
+   * @param obj Instância de para ser armazenada no arquivo.
+   */
+  public void Create(T obj) throws Exception {
+    arquivo.seek(0);
+    int ultimoID = arquivo.readInt();
+    ultimoID++;
+    arquivo.seek(0);
+    arquivo.writeInt(ultimoID);
+    obj.setID(ultimoID);
 
-      boolean spaceFound = false;
-      arquivo.seek(TAM_CABECALHO);
+    byte[] regitroOBJ = obj.toByteArray();
+    short tamanhoRegistroNovo = (short) regitroOBJ.length;
 
-      byte[] regitroOBJ = obj.toByteArray();
-      short tamanhoRegistroNovo = (short) regitroOBJ.length;
-      
-      long endereço = arquivo.getFilePointer();
-      index.put(ultimoID, endereço);
+    boolean spaceFound = false;
+    Long offset = null;
 
-      while (arquivo.getFilePointer() < arquivo.length()) {
+    arquivo.seek(TAM_CABECALHO);
 
-        long lapidePosition = arquivo.getFilePointer();
-        byte lapideValor = arquivo.readByte();
-        short tamanhoRegistroAtual = arquivo.readShort();
-        
+    while (arquivo.getFilePointer() < arquivo.length()) {
+      long lapidePosition = arquivo.getFilePointer();
+      byte lapideValor = arquivo.readByte();
+      short tamanhoRegistroAtual = arquivo.readShort();
 
-        if(lapideValor == '*'){
-          if(tamanhoRegistroAtual >= tamanhoRegistroNovo){
-
-            arquivo.seek(lapidePosition);
-            arquivo.writeByte(' ');
-            arquivo.writeShort(tamanhoRegistroNovo);
-            arquivo.write(regitroOBJ);
-            spaceFound = true;
-            //System.out.println("Registro reaproveitado: ");
-            break;
-          } 
-        } else{
-          arquivo.skipBytes(tamanhoRegistroAtual);
-        }
-      }
-
-      if(spaceFound == false){
-        arquivo.seek(arquivo.length());
+      if (lapideValor == '*' && tamanhoRegistroAtual >= tamanhoRegistroNovo) {
+        arquivo.seek(lapidePosition);
         arquivo.writeByte(' ');
         arquivo.writeShort(tamanhoRegistroNovo);
         arquivo.write(regitroOBJ);
+        spaceFound = true;
+        offset = lapidePosition;
+        break;
+      } else {
+        arquivo.skipBytes(tamanhoRegistroAtual);
       }
-
-    } catch (Exception e){
-        System.out.println("Ocorreu um excecao: " + e);
     }
+
+    if (!spaceFound) {
+      arquivo.seek(arquivo.length());
+      arquivo.writeByte(' ');
+      arquivo.writeShort(tamanhoRegistroNovo);
+      arquivo.write(regitroOBJ);
+      offset = arquivo.getFilePointer() - (1 + 2 + tamanhoRegistroNovo);
+    }
+
+    index.put(ultimoID, offset);
   }
-  
 
   /**
-  * Apaga um registro pelo ID marcando seu espaço como deletado (lapide '*').
-  *
-  * @param id ID do registro a ser deletado.
-  */
-  public void delete(int id){
-   
-    try{
-      // Primeiro temos que salvar o endereço da lapide e caminhar até o 
-      arquivo.seek(TAM_CABECALHO);
-
-      Long enderecoValorADeletar = index.get(id);
-
-      if(enderecoValorADeletar == null){
-        System.out.println("Valor não encontrado");
+   * Apaga um registro pelo ID marcando seu espaço como deletado (lapide '*').
+   *
+   * @param id ID do registro a ser deletado.
+   */
+  public void delete(int id) {
+    try {
+      Long offset = index.get(id);
+      if (offset == null) {
+        System.out.println("Registro com ID " + id + " não encontrado.");
         return;
-      } else{
-        arquivo.seek(enderecoValorADeletar);
-        arquivo.writeByte('*');
-        index.remove(enderecoValorADeletar);
       }
-
-      // while(arquivo.getFilePointer() < arquivo.length()){
-
-      //   long lapide = arquivo.getFilePointer();
-      //   arquivo.readByte();
-      //   short tamanhoRegistro = arquivo.readShort();
-  
-      //   int idAtual = arquivo.readInt();
-      //   //System.out.println(idAtual);
-
-      //   if(idAtual == id){
-      //     arquivo.seek(lapide);
-      //     arquivo.writeByte('*');
-      //   }
-      //   else{
-      //     arquivo.skipBytes(tamanhoRegistro - 4);
-        
-      //   }
-      
-      // }
-
-    } catch (Exception e){
-      System.out.println("Ocorreu uma excessao: "+ e);
-      
+      arquivo.seek(offset);
+      arquivo.writeByte('*'); // Marca o registro como deletado no arquivo.
+      index.remove(id); // Remove a referência do índice.
+    } catch (IOException e) {
+      System.out.println("Erro de I/O ao deletar registro: " + e.getMessage());
     }
   }
 
-
   /**
-  * Atualiza um registro no arquivo substituindo o antigo por um novo
-  * se o espaço for suficiente, ou escrevendo ao final do arquivo se necessário.     * 
-  * @param obj Registro a ser atualizado.
-  */
-  public void Update(T obj){
-    
-    int id = obj.getID();
-    try{
+   * Atualiza um registro no arquivo substituindo o antigo por um novo
+   * se o espaço for suficiente, ou escrevendo ao final do arquivo se necessário.
+   * *
+   * 
+   * @param obj Registro a ser atualizado.
+   * @throws Exception
+   */
+  public void Update(T obj) throws Exception {
+    try {
       arquivo.seek(TAM_CABECALHO);
-
-
       Long enderecoOBJ = index.get(obj.getID());
 
-      if(enderecoOBJ == null){
-        System.out.println("Objeto não encontrado");
+      if (enderecoOBJ == null) {
+        System.out.println("Objeto não encontrado para Update");
         return;
-      } else{
-
-        byte[] registroObj = obj.toByteArray();
-        short objTam = (short) registroObj.length;
-
-        arquivo.seek(enderecoOBJ);
-        arquivo.readByte();
-        short tamRegistro = arquivo.readShort();
-
-        if(tamRegistro >= objTam){
-
-          arquivo.writeByte(' ');
-          arquivo.writeShort(objTam);
-          arquivo.write(registroObj);
-
-        } else {
-          arquivo.seek(enderecoOBJ);
-          arquivo.writeByte('*');
-          arquivo.seek(arquivo.length());
-          arquivo.writeByte(' ');
-          arquivo.writeShort(objTam);
-          arquivo.write(registroObj);
-        }
-
       }
-      // while(arquivo.getFilePointer() < arquivo.length()){
 
-      //   byte[] registroObj = obj.toByteArray();
-      //   short objTam = (short) registroObj.length;
+      byte[] registroObj = obj.toByteArray();
+      short objTam = (short) registroObj.length;
 
+      arquivo.seek(enderecoOBJ);
+      arquivo.readByte();
+      short tamRegistro = arquivo.readShort();
 
-      //   long lapide = arquivo.getFilePointer();
-      //   byte lapideValor = arquivo.readByte();
-      //   short tamanhoRegistro = arquivo.readShort();
-        
-      //   int idAtual = arquivo.readInt();
-        
+      if (tamRegistro >= objTam) {
+        arquivo.seek(enderecoOBJ);
+        arquivo.writeByte(' ');
+        arquivo.writeShort(objTam);
+        arquivo.write(registroObj);
+      } else {
+        arquivo.seek(enderecoOBJ);
+        arquivo.writeByte('*');
+        index.remove(obj.getID());
+        arquivo.seek(arquivo.length());
+        Long novoEndereco = arquivo.getFilePointer();
+        arquivo.writeByte(' ');
+        arquivo.writeShort(objTam);
+        arquivo.write(registroObj);
+        index.put(obj.getID(), novoEndereco);
+      }
 
-      //   if(idAtual == id && lapideValor == ' '){
-      //     arquivo.seek(lapide);
-
-      //     if(tamanhoRegistro >= objTam){
-
-      //         arquivo.writeByte(' ');
-      //         arquivo.writeShort(objTam);
-      //         arquivo.write(registroObj);
-
-      //     } else {
-      //       arquivo.seek(lapide);
-      //       arquivo.writeByte('*');
-      //       arquivo.seek(arquivo.length());
-      //       arquivo.writeByte(' ');
-      //       arquivo.writeShort(objTam);
-      //       arquivo.write(registroObj);
-      //     }
-      //     break;
-      //   } else{
-      //     arquivo.skipBytes(tamanhoRegistro - 4);
-      //   }
-      // }
-
-    } catch (Exception e){
-      System.out.println("Ocorreu uma excessao: "+ e);
-      
+    } catch (IOException e) {
+      System.out.println("Ocorreu uma exceção no Update: " + e.getMessage());
     }
-    
   }
 
-
   /**
-  * Lê e deserializa um registro pelo ID.
-  * Retorna null se o registro não for encontrado ou se estiver marcado como deletado.
-  * 
-  * @param id ID do registro a ser lido.
-  * @return Uma instância de T se encontrado, null caso contrário.
-  */
-  public T read(int id) throws Exception{
-    
+   * Lê e deserializa um registro pelo ID.
+   * Retorna null se o registro não for encontrado ou se estiver marcado como
+   * deletado.
+   * 
+   * @param id ID do registro a ser lido.
+   * @return Uma instância de T se encontrado, null caso contrário.
+   */
+  public T read(int id) throws Exception {
     arquivo.seek(TAM_CABECALHO);
-    T obj = construtor.newInstance();
+    T obj = null;
+    try {
+      obj = construtor.newInstance();
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+      throw new Exception("Erro ao instanciar objeto: " + e.getMessage(), e);
+    }
 
     Long enderecoLeitura = index.get(id);
-    if(enderecoLeitura == null){
-      System.out.println("Objeto não encontrado para a leitura");
+    if (enderecoLeitura == null) {
+      System.out.println("Objeto não encontrado para a Leitura");
       return null;
-    } else{
+    } else {
       arquivo.seek(enderecoLeitura);
       byte lapide = arquivo.readByte();
-      if(lapide == ' '){
+      if (lapide == ' ') {
         short tamanhoRegistro = arquivo.readShort();
         byte[] registro = new byte[tamanhoRegistro];
-        arquivo.read(registro,0,tamanhoRegistro);
+        arquivo.read(registro, 0, tamanhoRegistro);
         obj.fromByteArray(registro);
         return obj;
-      } else{
-        System.out.println("O livro não está presente no acervo");
+      } else {
+        System.out.println("O registro não está presente no acervo");
         return null;
       }
     }
-    // while (arquivo.getFilePointer() < arquivo.length()) {
-
-    //   long lapide = arquivo.getFilePointer();
-    //   byte lapideValor = arquivo.readByte();
-    //   short tamanhoRegistro = arquivo.readShort();
-    //   byte[] registro; 
-
-    //   int index = arquivo.readInt();
-    //   arquivo.seek(lapide);
-    //   arquivo.readByte();
-    //   arquivo.readShort();
-
-    //   if(index == id && lapideValor != '*'){
-    //     System.out.println(tamanhoRegistro);
-    //     registro = new byte[tamanhoRegistro];
-    //     arquivo.read(registro,0,tamanhoRegistro);
-    //     obj.fromByteArray(registro);
-    //     return obj;
-    //   } else{
-    //     arquivo.skipBytes(tamanhoRegistro);
-    //   }
-    // }
-    // return null;
   }
 
-
   /**
-  * Fecha o arquivo de registros.
-  * Deve ser chamado para garantir que todas as alterações sejam salvas.
-  */
+   * Fecha o arquivo de registros.
+   * Deve ser chamado para garantir que todas as alterações sejam salvas.
+   */
   public void close() {
     try {
       if (arquivo != null) {
@@ -305,7 +209,5 @@ public class Arquivo<T extends Registro> {
       System.out.println("Erro ao fechar o arquivo: " + e.getMessage());
     }
   }
-
-  
 
 }

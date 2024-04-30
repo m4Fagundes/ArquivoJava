@@ -10,40 +10,40 @@ public class App {
         Livro livro = new Livro();
 
         livro.nome = "Cleam Code";
-        livro.altor = "Robert C. Martins";
+        livro.autor = "Robert C. Martins";
 
         Livro livro2 = new Livro();
 
-        livro.nome = "Scrum a Arte de Fazer o Dobro em Metade do Tempo";
-        livro.altor = "Jeff Sutherland";
+        livro2.nome = "Scrum a Arte de Fazer o Dobro em Metade do Tempo";
+        livro2.autor = "Jeff Sutherland";
 
         Livro livro3 = new Livro();
 
         livro3.nome = "Cleam Architecture";
-        livro3.altor = "Robert C. Martin";
+        livro3.autor = "Robert C. Martin";
 
-        Livro pessoa4 = new Livro();
+        Livro livro4 = new Livro();
 
-        pessoa4.nome = "O Universo em uma Casca de Nós";
-        pessoa4.altor = "Stephen Hawking";
+        livro4.nome = "O Universo em uma Casca de Nós";
+        livro4.autor = "Stephen Hawking";
 
         fileTeste.Create(livro);
         fileTeste.Create(livro2);
         fileTeste.delete(2);
-        fileTeste.Create(livro2);
-        fileTeste.Create(pessoa4);
+        fileTeste.Create(livro3);
+        fileTeste.Create(livro4);
         
 
         livro3.nome = "Como Programar Java";
-        livro3.altor = "Paul Deitel";
+        livro3.autor = "Paul Deitel";
 
         Livro livroRead = new Livro();
-
         fileTeste.Update(livro3);
-        livroRead = fileTeste.read(1);
+        
+        livroRead = fileTeste.read(3);
 
-        fileTeste.Create(livroRead);
-        System.out.println("O nome do livro é : " + livroRead.nome + livroRead.altor);
+        System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
+
 
 
         fileTeste.close();
