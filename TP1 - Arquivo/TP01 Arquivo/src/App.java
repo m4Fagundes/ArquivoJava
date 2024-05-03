@@ -40,7 +40,7 @@ public class App {
         Livro livroRead = new Livro();
         fileTeste.Update(livro3);
         
-        livroRead = fileTeste.read(3);
+        livroRead = fileTeste.read(4);
 
         System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
 

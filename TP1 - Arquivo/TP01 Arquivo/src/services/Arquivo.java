@@ -1,7 +1,7 @@
 package services;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.util.Hashtable;
+
 import models.*;
 
 /**
@@ -26,58 +28,62 @@ public class Arquivo<T extends Registro> {
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
   HashMap<Integer, Long> index = new HashMap<>(); // Tabela hash de indexação para pesquisa
 
-
   /**
-   * Salva o índice em um arquivo usando serialização.
+   * Constrói um arquivo que manipula registros do tipo T.
+   * O arquivo é criado ou aberto como leitura e escrita ('rw').
+   * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
+   * 
+   * @param c Construtor da classe T.
    */
-  public void salvarIndice() {
-    try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("indice.db"))) {
-      out.writeObject(index);
-    } catch (IOException e) {
-      System.out.println("Erro ao salvar índice: " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Carrega o índice de um arquivo usando serialização.
-   */
-  @SuppressWarnings("unchecked")
-  public void carregarIndice() {
-    try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("indice.db"))) {
-      index = (HashMap<Integer, Long>) in.readObject();
-    } catch (FileNotFoundException e) {
-      System.out.println("Arquivo de índice não encontrado. Um novo índice será criado.");
-      index = new HashMap<>();
-    } catch (IOException | ClassNotFoundException e) {
-      System.out.println("Erro ao carregar índice: " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
-  // Sobrescrever o construtor para carregar o índice ao inicializar
   public Arquivo(Constructor<T> c) throws Exception {
     this.construtor = c;
-    arquivo = new RandomAccessFile("pessoas.db", "rw");
-    carregarIndice(); // Carrega o índice na inicialização
+    this.arquivo = new RandomAccessFile("pessoas.db", "rw");
+    carregarHashMap();
+    
     if (arquivo.length() < TAM_CABECALHO) {
-      arquivo.seek(0);
-      arquivo.writeInt(0); // Escreve 0 no cabeçalho se o arquivo está vazio.
+        arquivo.seek(0);
+        arquivo.writeInt(0);
     }
-  }
+}
 
-  // Sobrescrever o método close para garantir que o índice seja salvo
-  public void close() {
-    try {
-      if (arquivo != null) {
-        arquivo.close();
-      }
-      salvarIndice(); // Salva o índice antes de fechar
+private void salvarHashMap() {
+    File arquivoIndice = new File("indexFile.db");
+    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(arquivoIndice))) {
+        oos.writeObject(index);
+        oos.flush();  // Força o buffer a escrever no arquivo
+        System.out.println("HashMap salvo com sucesso. Tamanho do arquivo: " + arquivoIndice.length() + " bytes.");
     } catch (IOException e) {
-      System.out.println("Erro ao fechar o arquivo: " + e.getMessage());
+        System.out.println("Erro ao salvar HashMap: " + e.getMessage());
+    }
+}
+
+@SuppressWarnings("unchecked")
+private void carregarHashMap() {
+    File arquivoIndice = new File("indexFile.db");
+    if (arquivoIndice.exists()) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(arquivoIndice))) {
+            index = (HashMap<Integer, Long>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Erro ao carregar HashMap: " + e.getMessage());
+            index = new HashMap<>();
+        }
+    } else {
+        System.out.println("Arquivo de índice não encontrado. Criando um novo HashMap.");
+        index = new HashMap<>();
+    }
+}
+
+
+  public class HashTableToFile {
+    public static void saveHashtable(Hashtable<Integer, String> hashtable, String filename) {
+      try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+        oos.writeObject(hashtable);
+      } catch (Exception e) {
+        System.out.println("Erro ao salvar a Hashtable: " + e.getMessage());
+        e.printStackTrace();
+      }
     }
   }
-  
 
   /**
    * Cria um novo registro no arquivo, utilizando índices para otimizar a busca.
@@ -97,7 +103,7 @@ public class Arquivo<T extends Registro> {
     byte[] registroOBJ = obj.toByteArray();
     short tamanhoRegistroNovo = (short) registroOBJ.length;
     boolean espaçoEncontrado = false;
-    Long offset = null;
+    Long offset = arquivo.length();
 
     arquivo.seek(TAM_CABECALHO);
 
@@ -124,10 +130,10 @@ public class Arquivo<T extends Registro> {
       arquivo.writeByte(' ');
       arquivo.writeShort(tamanhoRegistroNovo);
       arquivo.write(registroOBJ);
-      offset = arquivo.getFilePointer() - (1 + 2 + tamanhoRegistroNovo);
     }
 
     index.put(ultimoID, offset);
+    salvarHashMap();
   }
 
   /**
@@ -146,6 +152,7 @@ public class Arquivo<T extends Registro> {
       arquivo.seek(offset);
       arquivo.writeByte('*');
       index.remove(id);
+      salvarHashMap();
     } catch (IOException e) {
       System.out.println("Erro de I/O ao deletar registro: " + e.getMessage());
     }
@@ -186,6 +193,7 @@ public class Arquivo<T extends Registro> {
       arquivo.writeShort(novoTamanho);
       arquivo.write(novoRegistro);
       index.put(obj.getID(), novoEndereco);
+      salvarHashMap();
     }
   }
 
@@ -216,6 +224,21 @@ public class Arquivo<T extends Registro> {
     } else {
       System.out.println("O registro não está presente no acervo.");
       return null;
+    }
+  }
+
+  /**
+   * Fecha o arquivo e garante que todas as modificações sejam salvas.
+   * Deve ser chamado ao finalizar o uso do arquivo.
+   */
+  public void close() {
+    try {
+      if (arquivo != null) {
+        arquivo.close();
+      }
+      salvarHashMap();
+    } catch (IOException e) {
+      System.out.println("Erro ao fechar o arquivo: " + e.getMessage());
     }
   }
 }
