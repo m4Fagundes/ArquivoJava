@@ -1,6 +1,11 @@
 package services;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -21,21 +26,58 @@ public class Arquivo<T extends Registro> {
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
   HashMap<Integer, Long> index = new HashMap<>(); // Tabela hash de indexação para pesquisa
 
+
   /**
-   * Constrói um arquivo que manipula registros do tipo T.
-   * O arquivo é criado ou aberto como leitura e escrita ('rw').
-   * Um cabeçalho de arquivo é inicializado se o arquivo estiver vazio.
-   * 
-   * @param c Construtor da classe T.
+   * Salva o índice em um arquivo usando serialização.
    */
+  public void salvarIndice() {
+    try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("indice.db"))) {
+      out.writeObject(index);
+    } catch (IOException e) {
+      System.out.println("Erro ao salvar índice: " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Carrega o índice de um arquivo usando serialização.
+   */
+  @SuppressWarnings("unchecked")
+  public void carregarIndice() {
+    try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("indice.db"))) {
+      index = (HashMap<Integer, Long>) in.readObject();
+    } catch (FileNotFoundException e) {
+      System.out.println("Arquivo de índice não encontrado. Um novo índice será criado.");
+      index = new HashMap<>();
+    } catch (IOException | ClassNotFoundException e) {
+      System.out.println("Erro ao carregar índice: " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  // Sobrescrever o construtor para carregar o índice ao inicializar
   public Arquivo(Constructor<T> c) throws Exception {
     this.construtor = c;
     arquivo = new RandomAccessFile("pessoas.db", "rw");
+    carregarIndice(); // Carrega o índice na inicialização
     if (arquivo.length() < TAM_CABECALHO) {
       arquivo.seek(0);
       arquivo.writeInt(0); // Escreve 0 no cabeçalho se o arquivo está vazio.
     }
   }
+
+  // Sobrescrever o método close para garantir que o índice seja salvo
+  public void close() {
+    try {
+      if (arquivo != null) {
+        arquivo.close();
+      }
+      salvarIndice(); // Salva o índice antes de fechar
+    } catch (IOException e) {
+      System.out.println("Erro ao fechar o arquivo: " + e.getMessage());
+    }
+  }
+  
 
   /**
    * Cria um novo registro no arquivo, utilizando índices para otimizar a busca.
@@ -174,20 +216,6 @@ public class Arquivo<T extends Registro> {
     } else {
       System.out.println("O registro não está presente no acervo.");
       return null;
-    }
-  }
-
-  /**
-   * Fecha o arquivo e garante que todas as modificações sejam salvas.
-   * Deve ser chamado ao finalizar o uso do arquivo.
-   */
-  public void close() {
-    try {
-      if (arquivo != null) {
-        arquivo.close();
-      }
-    } catch (IOException e) {
-      System.out.println("Erro ao fechar o arquivo: " + e.getMessage());
     }
   }
 }
