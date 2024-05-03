@@ -9,7 +9,7 @@ public class App {
         
         Livro livro = new Livro();
 
-        livro.nome = "Cleam Code";
+        livro.nome = "Clean Code";
         livro.autor = "Robert C. Martins";
 
         Livro livro2 = new Livro();
@@ -19,7 +19,7 @@ public class App {
 
         Livro livro3 = new Livro();
 
-        livro3.nome = "Cleam Architecture";
+        livro3.nome = "Clean Architecture";
         livro3.autor = "Robert C. Martin";
 
         Livro livro4 = new Livro();
