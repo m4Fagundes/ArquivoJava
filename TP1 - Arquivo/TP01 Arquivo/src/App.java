@@ -45,7 +45,7 @@ public class App {
         System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
 
 
-
+        fileTeste.printHashMap();
         fileTeste.close();
         
     }

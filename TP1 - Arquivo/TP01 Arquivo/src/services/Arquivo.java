@@ -1,15 +1,13 @@
 package services;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import models.*;
 
@@ -24,6 +22,7 @@ import models.*;
 public class Arquivo<T extends Registro> {
 
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
+  protected RandomAccessFile arquivoIndice;
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
   HashMap<Integer, Long> index = new HashMap<>(); // Tabela hash de indexação para pesquisa
@@ -38,42 +37,63 @@ public class Arquivo<T extends Registro> {
   public Arquivo(Constructor<T> c) throws Exception {
     this.construtor = c;
     this.arquivo = new RandomAccessFile("pessoas.db", "rw");
+    this.arquivoIndice = new RandomAccessFile("indexFile.db", "rw");
     carregarHashMap();
-    
+
     if (arquivo.length() < TAM_CABECALHO) {
-        arquivo.seek(0);
-        arquivo.writeInt(0);
+      arquivo.seek(0);
+      arquivo.writeInt(0);
     }
-}
+  }
 
-private void salvarHashMap() {
-    File arquivoIndice = new File("indexFile.db");
-    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(arquivoIndice))) {
-        oos.writeObject(index);
-        oos.flush();  // Força o buffer a escrever no arquivo
-        System.out.println("HashMap salvo com sucesso. Tamanho do arquivo: " + arquivoIndice.length() + " bytes.");
+  /**
+   * Salva o índice atual em um arquivo usando serialização.
+   * Este método cria um arquivo se ele não existir ou sobrescreve o existente.
+   * Após a escrita, imprime o tamanho do arquivo salvo para fins de verificação.
+   */
+  private void salvarHashMap() {
+    try {
+      arquivoIndice.setLength(0);
+      arquivoIndice.seek(0);
+
+      for (Map.Entry<Integer, Long> entry : index.entrySet()) {
+        arquivoIndice.writeInt(entry.getKey());
+        arquivoIndice.writeLong(entry.getValue());
+      }
     } catch (IOException e) {
-        System.out.println("Erro ao salvar HashMap: " + e.getMessage());
+      System.out.println("Erro ao salvar HashMap: " + e.getMessage());
     }
-}
+  }
 
-@SuppressWarnings("unchecked")
-private void carregarHashMap() {
-    File arquivoIndice = new File("indexFile.db");
-    if (arquivoIndice.exists()) {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(arquivoIndice))) {
-            index = (HashMap<Integer, Long>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Erro ao carregar HashMap: " + e.getMessage());
-            index = new HashMap<>();
-        }
-    } else {
-        System.out.println("Arquivo de índice não encontrado. Criando um novo HashMap.");
-        index = new HashMap<>();
+  /**
+   * Carrega o índice do arquivo, se existente.
+   * Se o arquivo de índice não existir, inicia um novo HashMap.
+   * Em caso de falha na leitura ou desserialização, inicializa um novo HashMap
+   * e imprime o erro ocorrido.
+   */
+  private void carregarHashMap() {
+    try {
+      arquivoIndice.seek(0);
+      index.clear();
+
+      while (arquivoIndice.getFilePointer() < arquivoIndice.length()) {
+        int key = arquivoIndice.readInt();
+        long value = arquivoIndice.readLong();
+        index.put(key, value);
+      }
+    } catch (IOException e) {
+      System.out.println("Erro ao carregar HashMap: " + e.getMessage());
     }
-}
+  }
 
-
+  /**
+   * Classe auxiliar para salvar qualquer Hashtable em um arquivo.
+   * Utiliza serialização para salvar os dados de Hashtable em um arquivo
+   * especificado.
+   * 
+   * @param hashtable A Hashtable a ser salva.
+   * @param filename  O nome do arquivo em que a Hashtable será salva.
+   */
   public class HashTableToFile {
     public static void saveHashtable(Hashtable<Integer, String> hashtable, String filename) {
       try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
@@ -81,6 +101,16 @@ private void carregarHashMap() {
       } catch (Exception e) {
         System.out.println("Erro ao salvar a Hashtable: " + e.getMessage());
         e.printStackTrace();
+      }
+    }
+  }
+
+  public void printHashMap() {
+    if (index.isEmpty()) {
+      System.out.println("O HashMap está vazio.");
+    } else {
+      for (Map.Entry<Integer, Long> entry : index.entrySet()) {
+        System.out.println("Chave: " + entry.getKey() + ", Valor: " + entry.getValue());
       }
     }
   }
@@ -173,7 +203,7 @@ private void carregarHashMap() {
     }
 
     arquivo.seek(enderecoOBJ);
-    byte lapide = arquivo.readByte();
+    arquivo.readByte();
     short tamanhoAtual = arquivo.readShort();
     byte[] novoRegistro = obj.toByteArray();
     short novoTamanho = (short) novoRegistro.length;
@@ -233,12 +263,15 @@ private void carregarHashMap() {
    */
   public void close() {
     try {
+      salvarHashMap();
       if (arquivo != null) {
         arquivo.close();
       }
-      salvarHashMap();
+      if (arquivoIndice != null) {
+        arquivoIndice.close();
+      }
     } catch (IOException e) {
-      System.out.println("Erro ao fechar o arquivo: " + e.getMessage());
+      System.out.println("Erro ao fechar os arquivos: " + e.getMessage());
     }
   }
 }
