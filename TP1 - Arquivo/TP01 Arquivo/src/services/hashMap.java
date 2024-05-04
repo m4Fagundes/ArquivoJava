@@ -24,14 +24,14 @@ public class hashMap {
      * Este método cria um arquivo se ele não existir ou sobrescreve o existente.
      * Após a escrita, imprime o tamanho do arquivo salvo para fins de verificação.
      */
-    @SuppressWarnings("unused") void salvarHashMap() {
+    void salvarHashMap() {
         try {
             arquivoIndice.setLength(0);
             arquivoIndice.seek(0);
 
-            for (Map.Entry<Integer, Long> entry : index.entrySet()) {
-                arquivoIndice.writeInt(entry.getKey());
-                arquivoIndice.writeLong(entry.getValue());
+            for (Map.Entry<Integer, Long> entrada : index.entrySet()) {
+                arquivoIndice.writeInt(entrada.getKey());
+                arquivoIndice.writeLong(entrada.getValue());
             }
         } catch (IOException e) {
             System.out.println("Erro ao salvar HashMap: " + e.getMessage());
@@ -77,7 +77,7 @@ public class hashMap {
             }
         }
     }
-
+    
     public void printHashMap() {
         if (index.isEmpty()) {
             System.out.println("O HashMap está vazio.");

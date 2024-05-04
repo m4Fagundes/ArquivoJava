@@ -20,7 +20,8 @@ public class Arquivo<T extends Registro> {
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
   protected RandomAccessFile arquivoIndice;
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
-  public hashMap idDireto;
+  protected hashMap idDireto; // Objeto da classe HashMap
+  protected nameHash hashIndiretaNome;
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
 
 
@@ -35,6 +36,7 @@ public class Arquivo<T extends Registro> {
     this.construtor = c;
     this.arquivo = new RandomAccessFile("pessoas.db", "rw");
     idDireto = new hashMap();
+    hashIndiretaNome = new nameHash();
 
     if (arquivo.length() < TAM_CABECALHO) {
       arquivo.seek(0);
@@ -90,6 +92,8 @@ public class Arquivo<T extends Registro> {
 
     idDireto.index.put(ultimoID, offset);
     idDireto.salvarHashMap();
+    hashIndiretaNome.hash.put(obj.getNome(), obj.getID());
+    hashIndiretaNome.salvarHashMap();
   }
 
   /**
@@ -109,6 +113,9 @@ public class Arquivo<T extends Registro> {
       arquivo.writeByte('*');
       idDireto.index.remove(id);
       idDireto.salvarHashMap();
+      hashIndiretaNome.hash.remove(id);
+      hashIndiretaNome.salvarHashMap();
+
     } catch (IOException e) {
       System.out.println("Erro de I/O ao deletar registro: " + e.getMessage());
     }
@@ -193,11 +200,12 @@ public class Arquivo<T extends Registro> {
       if (arquivo != null) {
         arquivo.close();
       }
-      if (arquivoIndice != null) {
-        arquivoIndice.close();
-      }
     } catch (IOException e) {
       System.out.println("Erro ao fechar os arquivos: " + e.getMessage());
     }
+  }
+  // Funcao para chamar funcao protected no Main
+  public void printHashMapProtected(){
+    idDireto.printHashMap();
   }
 }

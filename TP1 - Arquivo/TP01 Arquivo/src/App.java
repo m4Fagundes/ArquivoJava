@@ -40,12 +40,12 @@ public class App {
         Livro livroRead = new Livro();
         fileTeste.Update(livro3);
         
-        livroRead = fileTeste.read(5);
+        livroRead = fileTeste.read(3);
 
         System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
 
 
-        fileTeste.idDireto.printHashMap();
+        fileTeste.printHashMapProtected();
         fileTeste.close();
         
     }

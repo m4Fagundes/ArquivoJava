@@ -34,5 +34,6 @@ public interface Registro extends Comparable<Object>, Cloneable {
     *         é menor que, igual a, ou maior que o objeto especificado, respectivamente.
     */
     public int compareTo();
+    public String getNome();
 
 }

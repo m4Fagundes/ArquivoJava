@@ -24,6 +24,12 @@ public class Livro implements Registro {
     public void setID(int id) {
         this.ID = id;
     }
+    @Override
+    public String getNome(){
+        return nome;
+    }
+
+
 
     @Override
     public byte[] toByteArray() throws Exception {
