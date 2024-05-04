@@ -56,11 +56,6 @@ public class nameHash {
             System.out.println("Erro ao carregar HashMap: " + e.getMessage());
         }
     }
-
-    /**
-     * Classes auxiliares e utilitários
-     */
-
     /**
      * Salva uma Hashtable em um arquivo usando serialização.
      * Isso é útil para persistência de dados estruturados.

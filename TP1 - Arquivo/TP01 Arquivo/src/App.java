@@ -44,8 +44,12 @@ public class App {
 
         System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
 
+        fileTeste.pesquisaPorNome("Clean Code");
+
+
 
         fileTeste.printHashMapProtected();
+        fileTeste.printatNameHashMapProtected();
         fileTeste.close();
         
     }

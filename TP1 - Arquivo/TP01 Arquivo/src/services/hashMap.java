@@ -77,7 +77,11 @@ public class hashMap {
             }
         }
     }
-    
+
+    /**
+     * Imprime todos os pares chave-valor do HashMap no console.
+     * Utilizado para verificações de integridade e depuração.
+     */
     public void printHashMap() {
         if (index.isEmpty()) {
             System.out.println("O HashMap está vazio.");

@@ -190,6 +190,16 @@ public class Arquivo<T extends Registro> {
     }
   }
 
+  public void pesquisaPorNome(String nome) throws Exception{
+    int id = hashIndiretaNome.hash.get(nome);
+    T obj = read(id);
+    if(obj != null){
+      System.out.println("O livro " + obj.getNome() + " está presente no banco de dados");
+    } else{
+      System.out.println("O livro não esta poresente no banco de dados");
+    }
+  }
+
   /**
    * Fecha o arquivo e garante que todas as modificações sejam salvas.
    * Deve ser chamado ao finalizar o uso do arquivo.
@@ -204,8 +214,12 @@ public class Arquivo<T extends Registro> {
       System.out.println("Erro ao fechar os arquivos: " + e.getMessage());
     }
   }
+
   // Funcao para chamar funcao protected no Main
   public void printHashMapProtected(){
     idDireto.printHashMap();
+  }
+  public void printatNameHashMapProtected(){
+    hashIndiretaNome.printHashMap();
   }
 }
