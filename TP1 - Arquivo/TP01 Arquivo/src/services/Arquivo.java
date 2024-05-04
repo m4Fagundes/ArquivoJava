@@ -1,13 +1,9 @@
 package services;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+
 
 import models.*;
 
@@ -24,8 +20,9 @@ public class Arquivo<T extends Registro> {
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
   protected RandomAccessFile arquivoIndice;
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
+  public hashMap idDireto;
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
-  HashMap<Integer, Long> index = new HashMap<>(); // Tabela hash de indexação para pesquisa
+
 
   /**
    * Constrói um arquivo que manipula registros do tipo T.
@@ -37,84 +34,13 @@ public class Arquivo<T extends Registro> {
   public Arquivo(Constructor<T> c) throws Exception {
     this.construtor = c;
     this.arquivo = new RandomAccessFile("pessoas.db", "rw");
-    this.arquivoIndice = new RandomAccessFile("indexFile.db", "rw");
-    carregarHashMap();
+    idDireto = new hashMap();
 
     if (arquivo.length() < TAM_CABECALHO) {
       arquivo.seek(0);
       arquivo.writeInt(0);
     }
   }
-
-  /**
-   * Salva o índice atual em um arquivo usando serialização.
-   * Este método cria um arquivo se ele não existir ou sobrescreve o existente.
-   * Após a escrita, imprime o tamanho do arquivo salvo para fins de verificação.
-   */
-  private void salvarHashMap() {
-    try {
-      arquivoIndice.setLength(0);
-      arquivoIndice.seek(0);
-
-      for (Map.Entry<Integer, Long> entry : index.entrySet()) {
-        arquivoIndice.writeInt(entry.getKey());
-        arquivoIndice.writeLong(entry.getValue());
-      }
-    } catch (IOException e) {
-      System.out.println("Erro ao salvar HashMap: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Carrega o índice do arquivo, se existente.
-   * Se o arquivo de índice não existir, inicia um novo HashMap.
-   * Em caso de falha na leitura ou desserialização, inicializa um novo HashMap
-   * e imprime o erro ocorrido.
-   */
-  private void carregarHashMap() {
-    try {
-      arquivoIndice.seek(0);
-      index.clear();
-
-      while (arquivoIndice.getFilePointer() < arquivoIndice.length()) {
-        int key = arquivoIndice.readInt();
-        long value = arquivoIndice.readLong();
-        index.put(key, value);
-      }
-    } catch (IOException e) {
-      System.out.println("Erro ao carregar HashMap: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Classe auxiliar para salvar qualquer Hashtable em um arquivo.
-   * Utiliza serialização para salvar os dados de Hashtable em um arquivo
-   * especificado.
-   * 
-   * @param hashtable A Hashtable a ser salva.
-   * @param filename  O nome do arquivo em que a Hashtable será salva.
-   */
-  public class HashTableToFile {
-    public static void saveHashtable(Hashtable<Integer, String> hashtable, String filename) {
-      try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
-        oos.writeObject(hashtable);
-      } catch (Exception e) {
-        System.out.println("Erro ao salvar a Hashtable: " + e.getMessage());
-        e.printStackTrace();
-      }
-    }
-  }
-
-  public void printHashMap() {
-    if (index.isEmpty()) {
-      System.out.println("O HashMap está vazio.");
-    } else {
-      for (Map.Entry<Integer, Long> entry : index.entrySet()) {
-        System.out.println("Chave: " + entry.getKey() + ", Valor: " + entry.getValue());
-      }
-    }
-  }
-
   /**
    * Cria um novo registro no arquivo, utilizando índices para otimizar a busca.
    * Salva o novo ID no objeto e no arquivo, e escreve o objeto serializado,
@@ -162,8 +88,8 @@ public class Arquivo<T extends Registro> {
       arquivo.write(registroOBJ);
     }
 
-    index.put(ultimoID, offset);
-    salvarHashMap();
+    idDireto.index.put(ultimoID, offset);
+    idDireto.salvarHashMap();
   }
 
   /**
@@ -174,15 +100,15 @@ public class Arquivo<T extends Registro> {
    */
   public void delete(int id) {
     try {
-      Long offset = index.get(id);
+      Long offset = idDireto.index.get(id);
       if (offset == null) {
         System.out.println("Registro com ID " + id + " não encontrado.");
         return;
       }
       arquivo.seek(offset);
       arquivo.writeByte('*');
-      index.remove(id);
-      salvarHashMap();
+      idDireto.index.remove(id);
+      idDireto.salvarHashMap();
     } catch (IOException e) {
       System.out.println("Erro de I/O ao deletar registro: " + e.getMessage());
     }
@@ -196,7 +122,7 @@ public class Arquivo<T extends Registro> {
    * @param obj Registro a ser atualizado.
    */
   public void Update(T obj) throws Exception {
-    Long enderecoOBJ = index.get(obj.getID());
+    Long enderecoOBJ = idDireto.index.get(obj.getID());
     if (enderecoOBJ == null) {
       System.out.println("Objeto não encontrado para atualização.");
       return;
@@ -216,14 +142,14 @@ public class Arquivo<T extends Registro> {
     } else {
       arquivo.seek(enderecoOBJ);
       arquivo.writeByte('*');
-      index.remove(obj.getID());
+      idDireto.index.remove(obj.getID());
       arquivo.seek(arquivo.length());
       long novoEndereco = arquivo.getFilePointer();
       arquivo.writeByte(' ');
       arquivo.writeShort(novoTamanho);
       arquivo.write(novoRegistro);
-      index.put(obj.getID(), novoEndereco);
-      salvarHashMap();
+      idDireto.index.put(obj.getID(), novoEndereco);
+      idDireto.salvarHashMap();
     }
   }
 
@@ -236,7 +162,7 @@ public class Arquivo<T extends Registro> {
    * @return Uma instância de T se encontrado, nulo caso contrário.
    */
   public T read(int id) throws Exception {
-    Long enderecoLeitura = index.get(id);
+    Long enderecoLeitura = idDireto.index.get(id);
     if (enderecoLeitura == null) {
       System.out.println("Objeto não encontrado para leitura.");
       return null;
@@ -263,7 +189,7 @@ public class Arquivo<T extends Registro> {
    */
   public void close() {
     try {
-      salvarHashMap();
+      idDireto.salvarHashMap();
       if (arquivo != null) {
         arquivo.close();
       }
