@@ -22,20 +22,27 @@ public class nameHash {
      * Salva o índice atual no arquivo por meio de escrita direta.
      * Limpa o arquivo existente e escreve os dados do HashMap.
      * Cada par chave-valor é gravado sequencialmente.
+     * @throws IOException 
      */
-    void salvarHashMap() {
-        try {
-            arquivoIndiretoNome.setLength(0); // Limpa o arquivo para evitar dados obsoletos.
-            arquivoIndiretoNome.seek(0); // Inicia no começo do arquivo.
+    void salvarHashMapFinal(String nome, int ID) throws Exception {
+        // try {
+        //     arquivoIndiretoNome.setLength(0); // Limpa o arquivo para evitar dados obsoletos.
+        //     arquivoIndiretoNome.seek(0); // Inicia no começo do arquivo.
 
-            for (Map.Entry<String, Integer> entrada : hash.entrySet()) {
-                arquivoIndiretoNome.writeUTF(entrada.getKey());
-                arquivoIndiretoNome.writeInt(entrada.getValue());
-            }
-        } catch (IOException e) {
-            System.out.println("Erro ao salvar HashMap: " + e.getMessage());
-        }
+        //     for (Map.Entry<String, Integer> entrada : hash.entrySet()) {
+        //         arquivoIndiretoNome.writeUTF(entrada.getKey());
+        //         arquivoIndiretoNome.writeInt(entrada.getValue());
+        //     }
+        // } catch (IOException e) {
+        //     System.out.println("Erro ao salvar HashMap: " + e.getMessage());
+        // }
+
+        arquivoIndiretoNome.seek(arquivoIndiretoNome.length());
+        arquivoIndiretoNome.writeUTF(nome);
+        arquivoIndiretoNome.writeInt(ID);
     }
+
+    
 
     /**
      * Carrega o índice do arquivo ao inicializar o objeto.

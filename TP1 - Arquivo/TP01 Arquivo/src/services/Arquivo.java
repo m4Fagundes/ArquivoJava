@@ -93,7 +93,7 @@ public class Arquivo<T extends Registro> {
     idDireto.index.put(ultimoID, offset);
     idDireto.salvarHashMap();
     hashIndiretaNome.hash.put(obj.getNome(), obj.getID());
-    hashIndiretaNome.salvarHashMap();
+    hashIndiretaNome.salvarHashMapFinal(obj.getNome(), obj.getID());
   }
 
   /**
@@ -111,10 +111,11 @@ public class Arquivo<T extends Registro> {
       }
       arquivo.seek(offset);
       arquivo.writeByte('*');
+      //TODO salvar a string do obj e depois mandar ela como parametro para o metodo de remocao
       idDireto.index.remove(id);
       idDireto.salvarHashMap();
       hashIndiretaNome.hash.remove(id);
-      hashIndiretaNome.salvarHashMap();
+      //hashIndiretaNome.salvarHashMap();
 
     } catch (IOException e) {
       System.out.println("Erro de I/O ao deletar registro: " + e.getMessage());
