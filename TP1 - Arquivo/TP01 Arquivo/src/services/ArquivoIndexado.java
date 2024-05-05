@@ -8,14 +8,14 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class hashMap {
+public class ArquivoIndexado {
 
     protected RandomAccessFile arquivoIndice;
     HashMap<Integer, Long> index = new HashMap<>(); // Tabela hash de indexação para pesquisa
 
 
-    public hashMap() throws Exception {
-        this.arquivoIndice = new RandomAccessFile("indexFile.db", "rw");
+    public ArquivoIndexado() throws Exception {
+        this.arquivoIndice = new RandomAccessFile("ID_Endereco.db", "rw");
         carregarHashMap();
     }
 

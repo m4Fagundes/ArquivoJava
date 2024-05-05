@@ -1,6 +1,7 @@
 package models;
 
 import java.io.*;
+import java.util.List;
 
 // Descricao dos metodos genericos na interface @Registro
 public class Livro implements Registro {
@@ -61,6 +62,15 @@ public class Livro implements Registro {
     public int compareTo() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'compareTo'");
+    }
+
+    @Override
+    public String[] getPalavras() {
+        return extrairPalavras(nome);
+    }
+
+    private String[] extrairPalavras(String entrada) {
+        return entrada.toLowerCase().split("\\W+"); // Divide a string em palavras usando expressões regulares
     }
 
 }

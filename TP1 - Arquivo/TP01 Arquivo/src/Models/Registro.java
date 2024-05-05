@@ -1,5 +1,7 @@
 package models;
 
+import java.util.List;
+
 /**
  * Interface Registro define as operações necessárias para objetos que podem ser
  * armazenados e recuperados em forma de registros numa estrutura de arquivo.
@@ -35,5 +37,6 @@ public interface Registro extends Comparable<Object>, Cloneable {
     */
     public int compareTo();
     public String getNome();
+    public String[] getPalavras();
 
 }

@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class nameHash {
+public class IndexacaoNome {
 
     protected RandomAccessFile arquivoIndiretoNome;
     HashMap<String, Integer> hash = new HashMap<>(); // Tabela hash para indexação e pesquisa rápida.
 
-    public nameHash() throws Exception {
-        this.arquivoIndiretoNome = new RandomAccessFile("nomeId.db", "rw");
+    public IndexacaoNome() throws Exception {
+        this.arquivoIndiretoNome = new RandomAccessFile("Nome_ID.db", "rw");
         carregarHashMap(); // Carregar o hashmap do arquivo no início.
     }
 
@@ -25,24 +25,25 @@ public class nameHash {
      * @throws IOException 
      */
     void salvarHashMapFinal(String nome, int ID) throws Exception {
-        // try {
-        //     arquivoIndiretoNome.setLength(0); // Limpa o arquivo para evitar dados obsoletos.
-        //     arquivoIndiretoNome.seek(0); // Inicia no começo do arquivo.
-
-        //     for (Map.Entry<String, Integer> entrada : hash.entrySet()) {
-        //         arquivoIndiretoNome.writeUTF(entrada.getKey());
-        //         arquivoIndiretoNome.writeInt(entrada.getValue());
-        //     }
-        // } catch (IOException e) {
-        //     System.out.println("Erro ao salvar HashMap: " + e.getMessage());
-        // }
-
         arquivoIndiretoNome.seek(arquivoIndiretoNome.length());
         arquivoIndiretoNome.writeUTF(nome);
         arquivoIndiretoNome.writeInt(ID);
     }
+    void salvarHashMap(){
+        try {
+            arquivoIndiretoNome.setLength(0); // Limpa o arquivo para evitar dados obsoletos.
+            arquivoIndiretoNome.seek(0); // Inicia no começo do arquivo.
 
-    
+            for (Map.Entry<String, Integer> entrada : hash.entrySet()) {
+                arquivoIndiretoNome.writeUTF(entrada.getKey());
+                arquivoIndiretoNome.writeInt(entrada.getValue());
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar HashMap: " + e.getMessage());
+        }
+    }
+
+
 
     /**
      * Carrega o índice do arquivo ao inicializar o objeto.

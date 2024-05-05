@@ -3,7 +3,8 @@ package services;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
-
+import java.text.Normalizer;
+import java.util.List;
 
 import models.*;
 
@@ -20,10 +21,10 @@ public class Arquivo<T extends Registro> {
   protected RandomAccessFile arquivo; // Objeto para leitura e escrita no arquivo.
   protected RandomAccessFile arquivoIndice;
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
-  protected hashMap idDireto; // Objeto da classe HashMap
-  protected nameHash hashIndiretaNome;
+  protected ArquivoIndexado idDireto; // Objeto da classe HashMap
+  protected IndexacaoNome hashIndiretaNome;
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
-
+  private ListaInvertida listaInvertida; // Mantém uma instância de ListaInvertida
 
   /**
    * Constrói um arquivo que manipula registros do tipo T.
@@ -35,14 +36,16 @@ public class Arquivo<T extends Registro> {
   public Arquivo(Constructor<T> c) throws Exception {
     this.construtor = c;
     this.arquivo = new RandomAccessFile("pessoas.db", "rw");
-    idDireto = new hashMap();
-    hashIndiretaNome = new nameHash();
+    idDireto = new ArquivoIndexado();
+    hashIndiretaNome = new IndexacaoNome();
+    listaInvertida = new ListaInvertida();
 
     if (arquivo.length() < TAM_CABECALHO) {
       arquivo.seek(0);
       arquivo.writeInt(0);
     }
   }
+
   /**
    * Cria um novo registro no arquivo, utilizando índices para otimizar a busca.
    * Salva o novo ID no objeto e no arquivo, e escreve o objeto serializado,
@@ -90,6 +93,9 @@ public class Arquivo<T extends Registro> {
       arquivo.write(registroOBJ);
     }
 
+    for (String palavra : extrairPalavrasParaIndice(obj)) {
+      listaInvertida.adicionarEntrada(palavra, offset); // Adiciona a palavra com a posição
+    }
     idDireto.index.put(ultimoID, offset);
     idDireto.salvarHashMap();
     hashIndiretaNome.hash.put(obj.getNome(), obj.getID());
@@ -111,11 +117,12 @@ public class Arquivo<T extends Registro> {
       }
       arquivo.seek(offset);
       arquivo.writeByte('*');
-      //TODO salvar a string do obj e depois mandar ela como parametro para o metodo de remocao
+      // TODO salvar a string do obj e depois mandar ela como parametro para o metodo
+      // de remocao
       idDireto.index.remove(id);
       idDireto.salvarHashMap();
       hashIndiretaNome.hash.remove(id);
-      //hashIndiretaNome.salvarHashMap();
+      hashIndiretaNome.salvarHashMap();
 
     } catch (IOException e) {
       System.out.println("Erro de I/O ao deletar registro: " + e.getMessage());
@@ -191,15 +198,16 @@ public class Arquivo<T extends Registro> {
     }
   }
 
-  public void pesquisaPorNome(String nome) throws Exception{
+  public void pesquisaPorNome(String nome) throws Exception {
     int id = hashIndiretaNome.hash.get(nome);
     T obj = read(id);
-    if(obj != null){
+    if (obj != null) {
       System.out.println("O livro " + obj.getNome() + " está presente no banco de dados");
-    } else{
+    } else {
       System.out.println("O livro não esta poresente no banco de dados");
     }
   }
+
 
   /**
    * Fecha o arquivo e garante que todas as modificações sejam salvas.
@@ -211,16 +219,24 @@ public class Arquivo<T extends Registro> {
       if (arquivo != null) {
         arquivo.close();
       }
+      listaInvertida.salvarIndice();
     } catch (IOException e) {
       System.out.println("Erro ao fechar os arquivos: " + e.getMessage());
     }
   }
+  private String[] extrairPalavrasParaIndice(T obj) {
+        // Extraia as palavras apropriadas do objeto T (pode variar de acordo com a implementação)
+        // Por exemplo, se obj tiver um método getPalavras(), você pode usar isso aqui
+        String[] palavras = obj.getPalavras();
+        return palavras;
+    }
 
   // Funcao para chamar funcao protected no Main
-  public void printHashMapProtected(){
+  public void printHashMapProtected() {
     idDireto.printHashMap();
   }
-  public void printatNameHashMapProtected(){
+  // Funcao para chamar a funcao protected do Main
+  public void printatNameHashMapProtected() {
     hashIndiretaNome.printHashMap();
   }
 }
