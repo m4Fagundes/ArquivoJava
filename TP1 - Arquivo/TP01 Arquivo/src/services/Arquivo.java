@@ -22,9 +22,10 @@ public class Arquivo<T extends Registro> {
   protected RandomAccessFile arquivoIndice;
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
   protected ArquivoIndexado idDireto; // Objeto da classe HashMap
-  protected IndexacaoNome hashIndiretaNome;
+  protected IndexacaoNome hashIndiretaNome; 
+  protected ListaInvertida invertedList;
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
-  private ListaInvertida listaInvertida; // Mantém uma instância de ListaInvertida
+
 
   /**
    * Constrói um arquivo que manipula registros do tipo T.
@@ -38,7 +39,7 @@ public class Arquivo<T extends Registro> {
     this.arquivo = new RandomAccessFile("pessoas.db", "rw");
     idDireto = new ArquivoIndexado();
     hashIndiretaNome = new IndexacaoNome();
-    listaInvertida = new ListaInvertida();
+    invertedList = new ListaInvertida();
 
     if (arquivo.length() < TAM_CABECALHO) {
       arquivo.seek(0);
@@ -93,11 +94,9 @@ public class Arquivo<T extends Registro> {
       arquivo.write(registroOBJ);
     }
 
-    for (String palavra : extrairPalavrasParaIndice(obj)) {
-      listaInvertida.adicionarEntrada(palavra, offset); // Adiciona a palavra com a posição
-    }
     idDireto.index.put(ultimoID, offset);
     idDireto.salvarHashMap();
+    invertedList.inserir(obj.getNome(), offset);
     hashIndiretaNome.hash.put(obj.getNome(), obj.getID());
     hashIndiretaNome.salvarHashMapFinal(obj.getNome(), obj.getID());
   }
@@ -208,6 +207,18 @@ public class Arquivo<T extends Registro> {
     }
   }
 
+  /*
+   * Funcao para remover acentos de uma sting e deixar ela mais comum
+   * para a busca com o atributo nome
+   */
+
+  public static String removerAcentos(String input) {
+    if (input == null) {
+      return null;
+    }
+    String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+    return normalized.replaceAll("\\p{M}", "");
+  }
 
   /**
    * Fecha o arquivo e garante que todas as modificações sejam salvas.
@@ -219,23 +230,17 @@ public class Arquivo<T extends Registro> {
       if (arquivo != null) {
         arquivo.close();
       }
-      listaInvertida.salvarIndice();
     } catch (IOException e) {
       System.out.println("Erro ao fechar os arquivos: " + e.getMessage());
     }
   }
-  private String[] extrairPalavrasParaIndice(T obj) {
-        // Extraia as palavras apropriadas do objeto T (pode variar de acordo com a implementação)
-        // Por exemplo, se obj tiver um método getPalavras(), você pode usar isso aqui
-        String[] palavras = obj.getPalavras();
-        return palavras;
-    }
+
 
   // Funcao para chamar funcao protected no Main
   public void printHashMapProtected() {
     idDireto.printHashMap();
   }
-  // Funcao para chamar a funcao protected do Main
+
   public void printatNameHashMapProtected() {
     hashIndiretaNome.printHashMap();
   }

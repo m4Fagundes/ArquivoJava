@@ -1,7 +1,6 @@
 package services;
 
 import java.io.*;
-import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -12,21 +11,42 @@ public class ListaInvertida {
     private RandomAccessFile arquivoListas;
     private HashMap<String, Long> indice = new HashMap<>();
 
-    /**
-     * Construtor da classe que inicializa os arquivos e carrega o índice existente.
-     */
-    public ListaInvertida() throws IOException {
+    public ListaInvertida() throws Exception {
         arquivoIndice = new RandomAccessFile("Palavra_EnderecoLinkedList.db", "rw");
         arquivoListas = new RandomAccessFile("LinkedList_OBJ.db", "rw");
+
+        // Carrega o índice existente dos arquivos
         carregarIndice();
+        carregarLista();
     }
 
-    /**
-     * Salva o índice atual no arquivo, escrevendo cada palavra e a posição
-     * correspondente no arquivo de listas.
-     *
-     */
-    public void salvarIndice() throws IOException {
+    // Método para inserir uma entrada na lista e no índice
+    public void inserir(String entrada, long endereco) throws Exception {
+        LinkedList<String> palavras = subdividirEmPalavras(entrada);
+
+        for (String palavra : palavras) {
+            if (!indice.containsKey(palavra)) {
+                LinkedList<Long> listaEnderecos = new LinkedList<>();
+                listaEnderecos.add(endereco);
+                long posicaoLista = salvarListaNoArquivo(listaEnderecos);
+    
+                indice.put(palavra, posicaoLista);
+            } else {
+                long posicaoLista = indice.get(palavra);
+                LinkedList<Long> listaEnderecos = carregarListaDoArquivo(posicaoLista);
+                listaEnderecos.add(endereco);
+                posicaoLista = salvarListaNoArquivo(listaEnderecos);
+                indice.put(palavra, posicaoLista);
+            }
+        }
+
+        // Salvar o índice e a lista após inserção
+        salvarIndice();
+        salvarLista();
+    }
+
+    // Implementação dos métodos de persistência
+    private void salvarIndice() throws IOException {
         arquivoIndice.setLength(0);
         arquivoIndice.seek(0);
 
@@ -36,45 +56,6 @@ public class ListaInvertida {
         }
     }
 
-    public void adicionarEntrada(String entradaCompleta, long posicao) throws IOException {
-        String[] palavras = extrairPalavras(entradaCompleta);
-        for (String palavra : palavras) {
-            adicionarPalavra(palavra, posicao);
-        }
-    }
-
-    /**
-     * Adiciona uma palavra e sua lista associada de posições ao índice.
-     * A lista é armazenada no arquivo de listas e a posição de início da lista é
-     * atualizada no índice.
-     *
-     * @param palavra a palavra chave do índice.
-     * @param lista   a lista de posições que será associada à palavra.
-     */
-    private void adicionarPalavra(String palavra, long posicaoObj) throws IOException {
-        LinkedList<Long> lista = buscarPalavra(palavra);
-        if (!lista.contains(posicaoObj)) {
-            lista.add(posicaoObj);
-            long posicaoLista = arquivoListas.length();
-            arquivoListas.seek(posicaoLista);
-
-            arquivoListas.writeInt(lista.size());
-            for (Long pos : lista) {
-                arquivoListas.writeLong(pos);
-            }
-
-            indice.put(palavra, posicaoLista);
-        }
-    }
-
-    private String[] extrairPalavras(String entrada) {
-        return entrada.toLowerCase().split("\\W+"); // Divide a string em palavras usando expressões regulares
-    }
-
-    /**
-     * Carrega o índice à partir do arquivo, reconstruindo o mapeamento de palavras
-     * para posições no arquivo de listas.
-     */
     private void carregarIndice() throws IOException {
         arquivoIndice.seek(0);
         indice.clear();
@@ -86,37 +67,66 @@ public class ListaInvertida {
         }
     }
 
-    /**
-     * Busca a lista de posições associada a uma palavra no índice.
-     * Retorna a lista de posições se a palavra existir, ou uma lista vazia caso
-     * contrário.
-     *
-     * @param palavra a palavra chave a ser buscada no índice.
-     * @return LinkedList<Long> a lista de posições associadas à palavra.
-     */
-    public LinkedList<Long> buscarPalavra(String palavra) throws IOException {
-        if (indice.containsKey(palavra)) {
-            long posicaoLista = indice.get(palavra);
-            arquivoListas.seek(posicaoLista);
-            int tamanhoDaLista = arquivoListas.readInt();
-            LinkedList<Long> lista = new LinkedList<>();
-
-            for (int i = 0; i < tamanhoDaLista; i++) {
-                lista.add(arquivoListas.readLong());
-            }
-            return lista;
+    private void salvarLista() throws IOException {
+        // Percorre o HashMap de índice para salvar todas as listas de endereços no arquivo
+        for (Map.Entry<String, Long> entrada : indice.entrySet()) {
+            LinkedList<Long> listaEnderecos = carregarListaDoArquivo(entrada.getValue());
+    
+            // Atualiza a lista no arquivo com os endereços salvos
+            long posicaoLista = salvarListaNoArquivo(listaEnderecos);
+            indice.put(entrada.getKey(), posicaoLista);
         }
-        return new LinkedList<>(); // Retorna lista vazia se a palavra não for encontrada
+    }
+    
+    private void carregarLista() throws IOException {
+        // Percorre o arquivo de índice para carregar as entradas e suas respectivas listas de endereços
+        arquivoIndice.seek(0);
+        indice.clear();
+    
+        while (arquivoIndice.getFilePointer() < arquivoIndice.length()) {
+            String palavra = arquivoIndice.readUTF();
+            long posicaoLista = arquivoIndice.readLong();
+            indice.put(palavra, posicaoLista);
+        }
+    }
+    
+
+    // Métodos auxiliares mantidos
+    private LinkedList<String> subdividirEmPalavras(String entrada) {
+        LinkedList<String> palavras = new LinkedList<>();
+
+        if (entrada != null && !entrada.isEmpty()) {
+            String[] palavrasArray = entrada.toLowerCase().split("\\W+"); 
+            for (String palavra : palavrasArray) {
+                palavras.add(palavra);
+            }
+        }
+
+        return palavras;
     }
 
-    public LinkedList<Long> buscarPorNome(String nome) throws Exception {
-        String palavraChave = limparPalavraChave(nome); // Limpa a palavra chave para pesquisa
-        return buscarPalavra(palavraChave); // Aproveita a funcionalidade de busca por palavra existente
+    private long salvarListaNoArquivo(LinkedList<Long> listaEnderecos) throws IOException {
+        arquivoListas.seek(arquivoListas.length());
+        long posicaoLista = arquivoListas.getFilePointer();
+
+        arquivoListas.writeInt(listaEnderecos.size());
+        for (Long endereco : listaEnderecos) {
+            arquivoListas.writeLong(endereco);
+        }
+
+        return posicaoLista;
     }
 
-    private String limparPalavraChave(String palavra) {
-        return Normalizer.normalize(palavra, Normalizer.Form.NFD)
-                .replaceAll("[^\\p{ASCII}]", "") // Remove acentos
-                .toLowerCase(); // Converte para minúsculas
+    private LinkedList<Long> carregarListaDoArquivo(long posicao) throws IOException {
+        LinkedList<Long> listaEnderecos = new LinkedList<>();
+        
+        arquivoListas.seek(posicao);
+        int tamanhoLista = arquivoListas.readInt();
+    
+        for (int i = 0; i < tamanhoLista; i++) {
+            listaEnderecos.add(arquivoListas.readLong());
+        }
+    
+        return listaEnderecos;
     }
 }
