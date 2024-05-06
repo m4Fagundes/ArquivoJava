@@ -120,11 +120,15 @@ public class ListaInvertida {
 
     private LinkedList<Integer> carregarListaDoArquivo(long posicao) throws IOException {
         LinkedList<Integer> listaID = new LinkedList<>();
-
+    
         arquivoListas.seek(posicao);
         int tamanhoLista = arquivoListas.readInt();
-        arquivoListas.writeInt(tamanhoLista);
-
+        
+        for (int i = 0; i < tamanhoLista; i++) {
+            int endereco = arquivoListas.readInt();
+            listaID.add(endereco);
+        }
+    
         return listaID;
     }
 
