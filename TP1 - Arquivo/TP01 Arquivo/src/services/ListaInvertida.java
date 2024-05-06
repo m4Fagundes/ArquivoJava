@@ -27,11 +27,14 @@ public class ListaInvertida {
         for (String palavra : palavras) {
             if (!indice.containsKey(palavra)) {
                 LinkedList<Integer> listaID = new LinkedList<>();
+                System.out.println("ID DENTRO DO ISERIR LINKED LIST: "+id);
                 listaID.add(id);
                 long posicaoLista = salvarListaNoArquivo(listaID);
 
                 indice.put(palavra, posicaoLista);
             } else {
+                System.out.println("ID DENTRO DO ISERIR LINKED LIST: "+id);
+
                 long posicaoLista = indice.get(palavra);
                 LinkedList<Integer> listaID = carregarListaDoArquivo(posicaoLista);
                 listaID.add(id);
@@ -111,8 +114,8 @@ public class ListaInvertida {
         long posicaoLista = arquivoListas.getFilePointer();
 
         arquivoListas.writeInt(listaID.size());
-        for (Integer endereco : listaID) {
-            arquivoListas.writeLong(endereco);
+        for (Integer ID : listaID) {
+            arquivoListas.writeInt(ID);
         }
 
         return posicaoLista;
