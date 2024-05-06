@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.text.Normalizer;
-import java.util.List;
-
 import models.*;
 
 /**
@@ -95,7 +93,7 @@ public class Arquivo<T extends Registro> {
 
     idDireto.index.put(ultimoID, offset);
     idDireto.salvarHashMap();
-    invertedList.inserir(obj.getNome(), offset);
+    invertedList.inserir(obj.getNome(), obj.getID());
     hashIndiretaNome.hash.put(obj.getNome(), obj.getID());
     hashIndiretaNome.salvarHashMapFinal(obj.getNome(), obj.getID());
   }
@@ -226,37 +224,34 @@ public class Arquivo<T extends Registro> {
     Long offset = invertedList.indice.get(palavra);
     System.out.println("Este e o endereco: " + offset);
 
-    Long enderecoTemp;
-
     if (offset == null) {
       System.out.println("Registro com essa palavra não encontrado.");
       return;
     }
-    do {
-        invertedList.arquivoListas.seek(offset);
-        enderecoTemp = invertedList.arquivoListas.readLong();
-        
-        if (enderecoTemp != -1) {
-            invertedList.arquivoListas.seek(enderecoTemp);
-            long enderecoOBJ = invertedList.arquivoListas.readLong();
-            arquivo.seek(enderecoOBJ);
-            byte lapide = arquivo.readByte();
-    
-            if (lapide == ' ') {
-                short tamanhoRegistro = arquivo.readShort();
-                byte[] registro = new byte[tamanhoRegistro];
-                arquivo.readFully(registro);
-                T obj = construtor.newInstance();
-                obj.fromByteArray(registro);
-                System.out.println(obj.getNome());
-            } else {
-                System.out.println("O registro não está presente no acervo.");
-            }
-    
-            offset = invertedList.arquivoListas.readLong();
-        }
-    } while (enderecoTemp != -1);
-    
+    invertedList.arquivoListas.seek(offset);
+    int quantidadeValores = arquivo.readInt();
+    System.out.println("Este e o tamanho da LinkedList: " + quantidadeValores);
+
+    for(int i=0; i<quantidadeValores; i++){
+      int ID = arquivo.readInt();
+      System.out.println("Este e o id: " + ID);
+      long endereco = idDireto.index.get(ID);
+      arquivo.seek(endereco);
+      byte lapide = arquivo.readByte();
+      if (lapide == ' ') {
+        short tamanhoRegistro = arquivo.readShort();
+        byte[] registro = new byte[tamanhoRegistro];
+        arquivo.readFully(registro);
+        T obj = construtor.newInstance();
+        obj.fromByteArray(registro);
+
+        System.out.println(obj.getNome());
+      } else {
+        System.out.println("O registro não está presente no acervo.");
+      }
+
+    }
+
 
   }
 
