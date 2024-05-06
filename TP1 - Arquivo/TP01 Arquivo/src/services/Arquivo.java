@@ -22,10 +22,9 @@ public class Arquivo<T extends Registro> {
   protected RandomAccessFile arquivoIndice;
   protected Constructor<T> construtor; // Construtor do tipo T, usado para criar instâncias de T.
   protected ArquivoIndexado idDireto; // Objeto da classe HashMap
-  protected IndexacaoNome hashIndiretaNome; 
+  protected IndexacaoNome hashIndiretaNome;
   protected ListaInvertida invertedList;
   final protected int TAM_CABECALHO = 4; // Tamanho fixo do cabeçalho do arquivo.
-
 
   /**
    * Constrói um arquivo que manipula registros do tipo T.
@@ -120,6 +119,7 @@ public class Arquivo<T extends Registro> {
       // de remocao
       idDireto.index.remove(id);
       idDireto.salvarHashMap();
+      // TODO Pegar o objeto com esse id correspondente para remover pelo nome
       hashIndiretaNome.hash.remove(id);
       hashIndiretaNome.salvarHashMap();
 
@@ -220,6 +220,45 @@ public class Arquivo<T extends Registro> {
     return normalized.replaceAll("\\p{M}", "");
   }
 
+  public void pesquisaPorPalavra(String palavra) throws Exception {
+
+    Long offset = invertedList.indice.get(palavra);
+    System.out.println("Este e o endereco: " + offset);
+
+    Long enderecoTemp;
+
+    if (offset == null) {
+      System.out.println("Registro com essa palavra não encontrado.");
+      return;
+    }
+    do {
+        invertedList.arquivoListas.seek(offset);
+        enderecoTemp = invertedList.arquivoListas.readLong();
+        
+        if (enderecoTemp != -1) {
+            invertedList.arquivoListas.seek(enderecoTemp);
+            long enderecoOBJ = invertedList.arquivoListas.readLong();
+            arquivo.seek(enderecoOBJ);
+            byte lapide = arquivo.readByte();
+    
+            if (lapide == ' ') {
+                short tamanhoRegistro = arquivo.readShort();
+                byte[] registro = new byte[tamanhoRegistro];
+                arquivo.readFully(registro);
+                T obj = construtor.newInstance();
+                obj.fromByteArray(registro);
+                System.out.println(obj.getNome());
+            } else {
+                System.out.println("O registro não está presente no acervo.");
+            }
+    
+            offset = invertedList.arquivoListas.readLong();
+        }
+    } while (enderecoTemp != -1);
+    
+
+  }
+
   /**
    * Fecha o arquivo e garante que todas as modificações sejam salvas.
    * Deve ser chamado ao finalizar o uso do arquivo.
@@ -234,7 +273,6 @@ public class Arquivo<T extends Registro> {
       System.out.println("Erro ao fechar os arquivos: " + e.getMessage());
     }
   }
-
 
   // Funcao para chamar funcao protected no Main
   public void printHashMapProtected() {

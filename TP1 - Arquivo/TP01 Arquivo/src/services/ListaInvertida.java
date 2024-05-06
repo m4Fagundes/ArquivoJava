@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class ListaInvertida {
 
-    private RandomAccessFile arquivoIndice;
-    private RandomAccessFile arquivoListas;
-    private HashMap<String, Long> indice = new HashMap<>();
+    RandomAccessFile arquivoIndice;
+    RandomAccessFile arquivoListas;
+    HashMap<String, Long> indice = new HashMap<>();
 
     public ListaInvertida() throws Exception {
         arquivoIndice = new RandomAccessFile("Palavra_EnderecoLinkedList.db", "rw");
@@ -29,7 +29,7 @@ public class ListaInvertida {
                 LinkedList<Long> listaEnderecos = new LinkedList<>();
                 listaEnderecos.add(endereco);
                 long posicaoLista = salvarListaNoArquivo(listaEnderecos);
-    
+
                 indice.put(palavra, posicaoLista);
             } else {
                 long posicaoLista = indice.get(palavra);
@@ -68,35 +68,36 @@ public class ListaInvertida {
     }
 
     private void salvarLista() throws IOException {
-        // Percorre o HashMap de índice para salvar todas as listas de endereços no arquivo
+        // Percorre o HashMap de índice para salvar todas as listas de endereços no
+        // arquivo
         for (Map.Entry<String, Long> entrada : indice.entrySet()) {
             LinkedList<Long> listaEnderecos = carregarListaDoArquivo(entrada.getValue());
-    
+
             // Atualiza a lista no arquivo com os endereços salvos
             long posicaoLista = salvarListaNoArquivo(listaEnderecos);
             indice.put(entrada.getKey(), posicaoLista);
         }
     }
-    
+
     private void carregarLista() throws IOException {
-        // Percorre o arquivo de índice para carregar as entradas e suas respectivas listas de endereços
+        // Percorre o arquivo de índice para carregar as entradas e suas respectivas
+        // listas de endereços
         arquivoIndice.seek(0);
         indice.clear();
-    
+
         while (arquivoIndice.getFilePointer() < arquivoIndice.length()) {
             String palavra = arquivoIndice.readUTF();
             long posicaoLista = arquivoIndice.readLong();
             indice.put(palavra, posicaoLista);
         }
     }
-    
 
     // Métodos auxiliares mantidos
     private LinkedList<String> subdividirEmPalavras(String entrada) {
         LinkedList<String> palavras = new LinkedList<>();
 
         if (entrada != null && !entrada.isEmpty()) {
-            String[] palavrasArray = entrada.toLowerCase().split("\\W+"); 
+            String[] palavrasArray = entrada.toLowerCase().split("\\W+");
             for (String palavra : palavrasArray) {
                 palavras.add(palavra);
             }
@@ -113,20 +114,22 @@ public class ListaInvertida {
         for (Long endereco : listaEnderecos) {
             arquivoListas.writeLong(endereco);
         }
+        arquivoIndice.writeLong(-1);
 
         return posicaoLista;
     }
 
     private LinkedList<Long> carregarListaDoArquivo(long posicao) throws IOException {
         LinkedList<Long> listaEnderecos = new LinkedList<>();
-        
+
         arquivoListas.seek(posicao);
         int tamanhoLista = arquivoListas.readInt();
-    
+
         for (int i = 0; i < tamanhoLista; i++) {
             listaEnderecos.add(arquivoListas.readLong());
         }
-    
+
         return listaEnderecos;
     }
+
 }
