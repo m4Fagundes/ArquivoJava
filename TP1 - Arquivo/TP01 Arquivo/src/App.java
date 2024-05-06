@@ -38,20 +38,17 @@ public class App {
         livro3.autor = "Paul Deitel";
 
         Livro livroRead = new Livro();
-        fileTeste.Update(livro3);
+        //fileTeste.Update(livro3);
         
         livroRead = fileTeste.read(3);
 
         System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
-
-        fileTeste.pesquisaPorPalavra("clean");
-
-
         fileTeste.pesquisaPorNome("Clean Code");
 
 
         fileTeste.printHashMapProtected();
         fileTeste.printatNameHashMapProtected();
+        fileTeste.pesquisaPorPalavra("clean");
         fileTeste.close();
         
     }

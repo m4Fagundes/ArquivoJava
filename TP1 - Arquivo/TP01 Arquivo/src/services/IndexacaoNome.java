@@ -87,6 +87,8 @@ public class IndexacaoNome {
      * Utilizado para verificações de integridade e depuração.
      */
     public void printHashMap() {
+        System.out.println("--------------------------------------");
+        System.out.println("PRINTANDO O ARQUIVO NOME ID");
         if (hash.isEmpty()) {
             System.out.println("O HashMap está vazio.");
         } else {
@@ -94,6 +96,7 @@ public class IndexacaoNome {
                 System.out.println("Chave: " + entry.getKey() + ", Valor: " + entry.getValue());
             }
         }
+        System.out.println("--------------------------------------");
     }
 
 }

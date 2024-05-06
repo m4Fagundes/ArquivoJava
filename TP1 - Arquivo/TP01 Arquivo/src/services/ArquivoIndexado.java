@@ -83,6 +83,8 @@ public class ArquivoIndexado {
      * Utilizado para verificações de integridade e depuração.
      */
     public void printHashMap() {
+        System.out.println("--------------------------------------");
+        System.out.println("PRINTANDO O ARQUIVO DE ID ENDERECO");
         if (index.isEmpty()) {
             System.out.println("O HashMap está vazio.");
         } else {
@@ -90,6 +92,7 @@ public class ArquivoIndexado {
                 System.out.println("Chave: " + entry.getKey() + ", Valor: " + entry.getValue());
             }
         }
+        System.out.println("--------------------------------------");
     }
 
 }

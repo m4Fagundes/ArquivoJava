@@ -222,39 +222,37 @@ public class Arquivo<T extends Registro> {
   public void pesquisaPorPalavra(String palavra) throws Exception {
     Long offset = invertedList.indice.get(palavra);
     if (offset == null) {
-        System.out.println("Registro com essa palavra não encontrado.");
-        return;
+      System.out.println("Registro com essa palavra não encontrado.");
+      return;
     }
-    
-    System.out.println("Este é o endereço: " + offset);
 
     invertedList.arquivoListas.seek(offset);
     int quantidadeValores = invertedList.arquivoListas.readInt();
-    System.out.println("Este é o tamanho da LinkedList: " + quantidadeValores);
+    System.out.println("--------------------------------------");
+    System.out.println("PRINTANDO NOME DE TODOS OS LIVROS COM A CHAVE: " + palavra);
+    for (int i = 0; i < quantidadeValores; i++) {
+      int ID = invertedList.arquivoListas.readInt();
+      Long endereco = idDireto.index.get(ID);
+      if (endereco != null) {
+        arquivo.seek(endereco);
+        byte lapide = arquivo.readByte();
+        if (lapide == ' ') {
+          short tamanhoRegistro = arquivo.readShort();
+          byte[] registro = new byte[tamanhoRegistro];
+          arquivo.readFully(registro);
+          T obj = construtor.newInstance();
+          obj.fromByteArray(registro);
 
-    for(int i = 0; i < quantidadeValores; i++) {
-        int ID = invertedList.arquivoListas.readInt();
-        System.out.println("Este é o ID: " + ID);
-        Long endereco = idDireto.index.get(ID);
-        if (endereco != null) {
-            arquivo.seek(endereco);
-            byte lapide = arquivo.readByte();
-            if (lapide == ' ') {
-                short tamanhoRegistro = arquivo.readShort();
-                byte[] registro = new byte[tamanhoRegistro];
-                arquivo.readFully(registro);
-                T obj = construtor.newInstance();
-                obj.fromByteArray(registro);
-    
-                System.out.println(obj.getNome());
-            } else {
-                System.out.println("O registro não está presente no acervo.");
-            }
+          System.out.println(obj.getNome());
         } else {
-            System.out.println("Endereço não encontrado para o ID: " + ID);
+          System.out.println("O registro não está presente no acervo.");
         }
+      } else {
+        System.out.println("Endereço não encontrado para o ID: " + ID);
+      }
     }
-}
+    System.out.println("--------------------------------------");
+  }
 
   /**
    * Fecha o arquivo e garante que todas as modificações sejam salvas.
