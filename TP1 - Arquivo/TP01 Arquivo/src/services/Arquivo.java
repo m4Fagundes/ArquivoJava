@@ -220,6 +220,7 @@ public class Arquivo<T extends Registro> {
     return normalized.replaceAll("\\p{M}", "");
   }
 
+  //TODO Metodo de pesquisa com erro ou persistencia da linked list com erro
   public void pesquisaPorPalavra(String palavra) throws Exception {
 
     Long offset = invertedList.indice.get(palavra);
