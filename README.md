@@ -2,6 +2,7 @@ Integrantes do Grupo
 
     Matheus Fagundes
     Luca Lourenço
+    Pedro Rodrigues
 
 Descrição das Rotinas
 
