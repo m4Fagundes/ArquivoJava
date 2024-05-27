@@ -48,7 +48,7 @@ public class App {
 
         fileTeste.printHashMapProtected();
         fileTeste.printatNameHashMapProtected();
-        fileTeste.pesquisaPorPalavra("clean");
+        fileTeste.pesquisaPorPalavra("o universo em");
         fileTeste.close();
         
     }

@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "App",
+      "request": "launch",
+      "mainClass": "App",
+      "projectName": "TP01-ArquivoJava_a1fb635b"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/m4fagundes/Desktop/teste_C_cpp_arduino/teste_c",
+      "program": "/Users/m4fagundes/Desktop/teste_C_cpp_arduino/teste_c/build/Debug/outDebug"
+    }
+  ]
+}

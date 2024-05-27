@@ -23,20 +23,21 @@ public class ListaInvertida {
     // Método para inserir uma entrada na lista e no índice
     public void inserir(String entrada, int id) throws Exception {
         LinkedList<String> palavras = subdividirEmPalavras(entrada);
+        LinkedList<String> combinacoes = gerarCombinacoes(palavras);
 
-        for (String palavra : palavras) {
-            if (!indice.containsKey(palavra)) {
+        for (String combinacao : combinacoes) {
+            if (!indice.containsKey(combinacao)) {
                 LinkedList<Integer> listaID = new LinkedList<>();
                 listaID.add(id);
                 long posicaoLista = salvarListaNoArquivo(listaID);
 
-                indice.put(palavra, posicaoLista);
+                indice.put(combinacao, posicaoLista);
             } else {
-                long posicaoLista = indice.get(palavra);
+                long posicaoLista = indice.get(combinacao);
                 LinkedList<Integer> listaID = carregarListaDoArquivo(posicaoLista);
                 listaID.add(id);
                 posicaoLista = salvarListaNoArquivo(listaID);
-                indice.put(palavra, posicaoLista);
+                indice.put(combinacao, posicaoLista);
             }
         }
 
@@ -104,6 +105,24 @@ public class ListaInvertida {
         }
 
         return palavras;
+    }
+
+    private LinkedList<String> gerarCombinacoes(LinkedList<String> palavras) {
+        LinkedList<String> combinacoes = new LinkedList<>();
+
+        int n = palavras.size();
+        for (int i = 0; i < n; i++) {
+            StringBuilder combinacao = new StringBuilder();
+            for (int j = i; j < n; j++) {
+                if (j > i) {
+                    combinacao.append(" ");
+                }
+                combinacao.append(palavras.get(j));
+                combinacoes.add(combinacao.toString());
+            }
+        }
+
+        return combinacoes;
     }
 
     private long salvarListaNoArquivo(LinkedList<Integer> listaID) throws IOException {
