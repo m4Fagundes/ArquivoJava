@@ -12,8 +12,8 @@ public class ListaInvertida {
     HashMap<String, Long> indice = new HashMap<>();
 
     public ListaInvertida() throws Exception {
-        arquivoIndice = new RandomAccessFile("Palavra_EnderecoLinkedList.db", "rw");
-        arquivoListas = new RandomAccessFile("LinkedList_OBJ.db", "rw");
+        arquivoIndice = new RandomAccessFile("TP1 - Arquivo/TP01 Arquivo/src/DataBase/Palavra_EnderecoLinkedList.db", "rw");
+        arquivoListas = new RandomAccessFile("TP1 - Arquivo/TP01 Arquivo/src/DataBase/LinkedList_OBJ.db", "rw");
 
         // Carrega o índice existente dos arquivos
         carregarIndice();

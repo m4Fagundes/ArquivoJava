@@ -14,7 +14,7 @@ public class IndexacaoNome {
     HashMap<String, Integer> hash = new HashMap<>(); // Tabela hash para indexação e pesquisa rápida.
 
     public IndexacaoNome() throws Exception {
-        this.arquivoIndiretoNome = new RandomAccessFile("Nome_ID.db", "rw");
+        this.arquivoIndiretoNome = new RandomAccessFile("TP1 - Arquivo/TP01 Arquivo/src/DataBase/Nome_ID.db", "rw");
         carregarHashMap(); // Carregar o hashmap do arquivo no início.
     }
 

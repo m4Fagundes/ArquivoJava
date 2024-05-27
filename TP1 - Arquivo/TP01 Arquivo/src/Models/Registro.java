@@ -1,7 +1,5 @@
 package models;
 
-import java.util.List;
-
 /**
  * Interface Registro define as operações necessárias para objetos que podem ser
  * armazenados e recuperados em forma de registros numa estrutura de arquivo.

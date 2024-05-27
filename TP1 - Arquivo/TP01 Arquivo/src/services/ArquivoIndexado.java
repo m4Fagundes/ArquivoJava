@@ -15,7 +15,7 @@ public class ArquivoIndexado {
 
 
     public ArquivoIndexado() throws Exception {
-        this.arquivoIndice = new RandomAccessFile("ID_Endereco.db", "rw");
+        this.arquivoIndice = new RandomAccessFile("TP1 - Arquivo/TP01 Arquivo/src/DataBase/ID_Endereco.db", "rw");
         carregarHashMap();
     }
 

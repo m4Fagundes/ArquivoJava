@@ -1,12 +1,18 @@
 import models.*;
 import services.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) throws Exception {
 
         Arquivo<Livro> fileTeste = new Arquivo<>(Livro.class.getConstructor());
-        
+
         Livro livro = new Livro();
 
         livro.nome = "Clean Code";
@@ -32,24 +38,30 @@ public class App {
         fileTeste.delete(2);
         fileTeste.Create(livro3);
         fileTeste.Create(livro4);
-        
 
         livro3.nome = "Como Programar Java";
         livro3.autor = "Paul Deitel";
 
         Livro livroRead = new Livro();
         //fileTeste.Update(livro3);
-        
+
         livroRead = fileTeste.read(3);
 
-        System.out.println("O nome do livro é : " + livroRead.nome + livroRead.autor);
+        System.out.println("O nome do livro é : " + livroRead.nome +
+        livroRead.autor);
         fileTeste.pesquisaPorNome("Clean Code");
-
 
         fileTeste.printHashMapProtected();
         fileTeste.printatNameHashMapProtected();
         fileTeste.pesquisaPorPalavra("o universo em");
-        fileTeste.close();
-        
+
+        String pastaEntrada = "TP1 - Arquivo/TP01 Arquivo/src/DataBase";
+        String pastaDeSaida = "TP1 - Arquivo/TP01 Arquivo/src/Backup";
+        String pastaDeSaidaDescompactada = "TP1 - Arquivo/TP01 Arquivo/src/BackupDesc";
+
+
+        LZW.compactarPastaLZW(pastaEntrada, pastaDeSaida);
+        LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
+
     }
 }

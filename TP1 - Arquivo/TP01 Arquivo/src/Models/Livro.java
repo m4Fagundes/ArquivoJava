@@ -1,7 +1,6 @@
 package models;
 
 import java.io.*;
-import java.util.List;
 
 // Descricao dos metodos genericos na interface @Registro
 public class Livro implements Registro {

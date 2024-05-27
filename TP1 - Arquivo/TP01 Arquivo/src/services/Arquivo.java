@@ -33,7 +33,7 @@ public class Arquivo<T extends Registro> {
    */
   public Arquivo(Constructor<T> c) throws Exception {
     this.construtor = c;
-    this.arquivo = new RandomAccessFile("pessoas.db", "rw");
+    this.arquivo = new RandomAccessFile("TP1 - Arquivo/TP01 Arquivo/src/DataBase/pessoas.db", "rw"); //
     idDireto = new ArquivoIndexado();
     hashIndiretaNome = new IndexacaoNome();
     invertedList = new ListaInvertida();
