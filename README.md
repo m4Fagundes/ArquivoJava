@@ -1,47 +1,38 @@
-Banco de Dados em Java
+Integrantes do Grupo
 
-Este projeto implementa um banco de dados manual em Java, desenvolvido como parte das atividades da disciplina de Algoritmos e Estruturas de Dados III. O banco de dados armazena informações de maneira inteligente, utilizando métodos Create, Update e Delete, e inclui o reaproveitamento de espaço para otimização do armazenamento.
-Funcionalidades
+    Matheus Fagundes
+    Luca Lourenço
+    Pedro Rodrigues
 
--    Criar novos registros
--    Atualizar registros existentes
--    Excluir registros
--    Reaproveitar espaço liberado por registros excluídos
+Descrição das Rotinas
 
-Desenvolvimento
+Abaixo estão descritas as principais classes, métodos e funções implementadas no nosso projeto de Biblioteca Digital.
+Classe: Livro
+Métodos:
 
-O projeto foi desenvolvido de forma totalmente autoral, baseado apenas no conhecimento lógico adquirido nas aulas da disciplina. O código do professor não foi utilizado, demonstrando a aplicação prática dos conceitos aprendidos.
+    adicionar(): Adiciona um novo livro à biblioteca e atualiza a lista invertida com os termos do título.
+    alterar(): Modifica informações de um livro existente e atualiza a lista invertida conforme as mudanças.
+    remover(): Remove um livro da biblioteca e deleta os termos do título da lista invertida.
 
-Respondendo as Perguntas
+Função: busca
 
-O que você considerou como perda aceitável para o reuso de espaços vazios, isto é, quais são os critérios para a gestão dos espaços vazios?
-  - Se o espaço tiver marcado como lapide toda vez que um novo registro e colocado no arquivo, é verificado se em algum dos espaços vazios é possível de ser armazenado.
+    buscarPorPalavra(termo): Retorna uma lista de livros que contêm o termo especificado no título.
 
-O código do CRUD com arquivos de tipos genéricos está funcionando corretamente?
-  - Sim o CRUD funciona corretamente para o tipo de dados genérico.
+Experiência do Grupo
 
-O CRUD tem um índice direto implementado com a tabela hash extensível?
-  - Não.... ainda, da forma que o arquivo para qual implementamos fora um Arquivo Sequencial.
+Durante o desenvolvimento do Trabalho Prático (TP), enfrentamos alguns desafios, especialmente na implementação da lista invertida. Conseguimos implementar todos os requisitos básicos, mas a gestão de tempo foi um desafio. No entanto, os resultados foram alcançados com sucesso e estamos satisfeitos com o desempenho do sistema.
+Desafios:
 
-A operação de inclusão busca o espaço vazio mais adequado para o novo registro antes de acrescentá-lo ao fim do arquivo?
-  - A operação de inclusão busca um espaço válido para que o registro seja colocado, ou seja, verifica se o tamanho de bytes após uma lápide marcada seja suficiente para receber o novo registro.
+    Sincronização da lista invertida com as operações de adição, de livros.
 
-A operação de alteração busca o espaço vazio mais adequado para o registro quando ele cresce de tamanho antes de acrescentá-lo ao fim do arquivo?
-  - Sim!
+Checklist
 
-As operações de alteração (quando for o caso) e de exclusão estão gerenciando os espaços vazios para que possam ser reaproveitados?
-  - Sim, ambas quando marcado lapide no registro, criam-se espaços para armazenamentos posteriores.
-
-O trabalho está funcionando corretamente?
-  - Sim, o trabalho esta funcionando perfeitamente, reaproveitando espaços vazios como foi solicitado na atividade.
-  
-O trabalho está completo?
-  - Sim, o trabalho atende ao exigido no enunciado.
-  
-O trabalho é original e não a cópia de um trabalho de um colega?
-  - Sim o trabalho e 100% original, feito baseado apenas nos conhecimentos adquiridos na diciplina.
-
-Criadores/Colaboradores
-
-Matheus Fagundes
-Luca Lourenço
+    A inclusão de um livro acrescenta os termos do seu título à lista invertida? Sim
+    A alteração de um livro modifica a lista invertida removendo ou acrescentando termos do título? Não....Ainda
+    A remoção de um livro gera a remoção dos termos do seu título na lista invertida? Sim
+    Há uma busca por palavras que retorna os livros que possuam essas palavras? Sim
+    Essa busca pode ser feita com mais de uma palavra? Não....Ainda
+    As stop words foram removidas de todo o processo? Sim
+    O trabalho está funcionando corretamente? Sim
+    O trabalho está completo? Sim
+    O trabalho é original e não a cópia de um trabalho de um colega? Sim
