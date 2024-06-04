@@ -1,12 +1,10 @@
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+
 import models.*;
 import services.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -57,10 +55,20 @@ public class App {
 
         String pastaEntrada = "TP1 - Arquivo/TP01 Arquivo/src/DataBase";
         String pastaDeSaida = "TP1 - Arquivo/TP01 Arquivo/src/Backup";
-        String pastaDeSaidaDescompactada = "TP1 - Arquivo/TP01 Arquivo/src/BackupDesc";
+        String pastaDeSaidaDescompactada = "TP1 - Arquivo/TP01 Arquivo/src/BackupDescompactado";
 
 
-        LZW.compactarPastaLZW(pastaEntrada, pastaDeSaida);
+        //LZW.compactarPastaLZW(pastaEntrada, pastaDeSaida);
+        //LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
+
+        // Cria um formato de data e hora para os backps
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String dataAtual = dateFormat.format(new Date());
+        String pastaSaida = pastaDeSaida + "/" + dataAtual;
+
+        // Compacta a pasta
+        LZW.compactarPastaLZW(pastaEntrada, pastaSaida);
+        // Descompacta a pasta
         LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
 
     }

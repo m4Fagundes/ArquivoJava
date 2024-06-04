@@ -1,5 +1,7 @@
 package services;
 
+
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -13,22 +15,28 @@ import java.util.Map;
 
 public class LZW {
 
-    public static void compactarPastaLZW(String pastaEntrada, String pastaSaida) {
+    public static void compactarPastaLZW(String pastaEntrada, String pastaSaidaBase) {
         File diretorio = new File(pastaEntrada);
         File[] arquivos = diretorio.listFiles();
 
+        // Cria diretório de saída se não existir
+        File pastaSaida = new File(pastaSaidaBase);
+        if (!pastaSaida.exists()) {
+            pastaSaida.mkdirs();
+        }
+
         for (File arquivo : arquivos) {
             if (arquivo.isDirectory()) {
-                compactarPastaLZW(arquivo.getAbsolutePath(), pastaSaida);
+                compactarPastaLZW(arquivo.getAbsolutePath(), pastaSaidaBase + "/" + arquivo.getName());
             } else {
-                compactarArquivoLZW(arquivo.getAbsolutePath(), pastaSaida + "/" + arquivo.getName() + ".lzw");
+                compactarArquivoLZW(arquivo.getAbsolutePath(), pastaSaidaBase + "/" + arquivo.getName() + ".lzw");
             }
         }
     }
 
     public static void compactarArquivoLZW(String arquivoEntrada, String arquivoSaida) {
         try (FileInputStream fis = new FileInputStream(arquivoEntrada);
-                DataOutputStream dos = new DataOutputStream(new FileOutputStream(arquivoSaida))) {
+             DataOutputStream dos = new DataOutputStream(new FileOutputStream(arquivoSaida))) {
 
             Map<String, Integer> dicionario = new HashMap<>();
             for (int i = 0; i < 256; i++) {
@@ -62,7 +70,6 @@ public class LZW {
     }
 
     public static void descompactarPastaLZW(String pastaCompactada, String pastaSaida) {
-
         File diretorio = new File(pastaCompactada);
         File[] arquivos = diretorio.listFiles();
 
@@ -72,28 +79,29 @@ public class LZW {
             }
         }
     }
+
     public static void descompactarArquivoLZW(String arquivoCompactado, String pastaSaida) {
         File pastaSaidaFile = new File(pastaSaida);
         if (!pastaSaidaFile.exists() || !pastaSaidaFile.isDirectory()) {
             pastaSaidaFile.mkdirs();
         }
-    
+
         try (DataInputStream dis = new DataInputStream(new FileInputStream(arquivoCompactado));
              FileOutputStream fos = new FileOutputStream(pastaSaida + "/" + new File(arquivoCompactado).getName().replace(".lzw", ""))) {
-    
+
             Map<Integer, String> dicionario = new HashMap<>();
             for (int i = 0; i < 256; i++) {
                 dicionario.put(i, String.valueOf((char) i));
             }
-    
+
             int proximoCodigo = 256;
             StringBuilder palavra = new StringBuilder();
             List<String> saidaDados = new ArrayList<>();
-    
+
             int codigoAnterior = dis.readShort();
             palavra.append(dicionario.get(codigoAnterior));
             saidaDados.add(dicionario.get(codigoAnterior));
-    
+
             int codigo;
             while (dis.available() > 0) {
                 codigo = dis.readShort();
@@ -105,14 +113,14 @@ public class LZW {
                 } else {
                     throw new IllegalArgumentException("Código não encontrado no dicionário.");
                 }
-    
+
                 saidaDados.add(entrada);
-                
+
                 dicionario.put(proximoCodigo++, palavra.toString() + entrada.charAt(0));
-                
+
                 palavra = new StringBuilder(entrada);
             }
-    
+
             for (String dados : saidaDados) {
                 for (char c : dados.toCharArray()) {
                     fos.write(c);
@@ -121,5 +129,5 @@ public class LZW {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }    
-  }
+    }
+}
