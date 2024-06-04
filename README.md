@@ -4,35 +4,41 @@ Integrantes do Grupo
     Luca Lourenço
     Pedro Rodrigues
 
-Descrição das Rotinas
+D# Relatório de Projeto - Backup com LZW
 
-Abaixo estão descritas as principais classes, métodos e funções implementadas no nosso projeto de Biblioteca Digital.
-Classe: Livro
-Métodos:
+## Descrição do Projeto
 
-    adicionar(): Adiciona um novo livro à biblioteca e atualiza a lista invertida com os termos do título.
-    alterar(): Modifica informações de um livro existente e atualiza a lista invertida conforme as mudanças.
-    remover(): Remove um livro da biblioteca e deleta os termos do título da lista invertida.
+O projeto consiste em implementar um sistema de backup de arquivos utilizando o algoritmo LZW para compactação e descompactação. O sistema permite ao usuário escolher qual versão de backup recuperar e automatiza o processo de compactação e descompactação.
 
-Função: busca
+## Implementações
 
-    buscarPorPalavra(termo): Retorna uma lista de livros que contêm o termo especificado no título.
+### Classe LZW
 
-Experiência do Grupo
+A classe LZW contém os métodos essenciais para compactação e descompactação de arquivos:
 
-Durante o desenvolvimento do Trabalho Prático (TP), enfrentamos alguns desafios, especialmente na implementação da lista invertida. Conseguimos implementar todos os requisitos básicos, mas a gestão de tempo foi um desafio. No entanto, os resultados foram alcançados com sucesso e estamos satisfeitos com o desempenho do sistema.
-Desafios:
+- **`compactarPastaLZW(pastaEntrada, pastaSaidaBase)`:** Este método percorre recursivamente uma pasta de entrada e compacta todos os arquivos utilizando o algoritmo LZW.
+- **`compactarArquivoLZW(arquivoEntrada, arquivoSaida)`:** Este método compacta um arquivo individual utilizando o algoritmo LZW.
+- **`descompactarPastaLZW(pastaCompactada, pastaSaida)`:** Descompacta uma pasta de arquivos previamente compactada com o algoritmo LZW.
+- **`descompactarArquivoLZW(arquivoCompactado, pastaSaida)`:** Descompacta um arquivo individual previamente compactado com o algoritmo LZW.
 
-    Sincronização da lista invertida com as operações de adição, de livros.
+### Outras Funcionalidades
 
-Checklist
+- **`escolherPastaParaDescompactar(caminhoBackup)`:** Permite ao usuário escolher dinamicamente qual pasta de backup descompactar, listando todas as pastas disponíveis.
 
-    A inclusão de um livro acrescenta os termos do seu título à lista invertida? Sim
-    A alteração de um livro modifica a lista invertida removendo ou acrescentando termos do título? Não....Ainda
-    A remoção de um livro gera a remoção dos termos do seu título na lista invertida? Sim
-    Há uma busca por palavras que retorna os livros que possuam essas palavras? Sim
-    Essa busca pode ser feita com mais de uma palavra? Não....Ainda
-    As stop words foram removidas de todo o processo? Sim
-    O trabalho está funcionando corretamente? Sim
-    O trabalho está completo? Sim
-    O trabalho é original e não a cópia de um trabalho de um colega? Sim
+## Experiência do Grupo
+
+O grupo conseguiu implementar com sucesso o sistema de backup com LZW, incluindo a escolha dinâmica de pastas para descompactação. A lógica por trás da escolha da pasta de backup ajuda a tornar a recuperação de backups mais flexível e amigável para o usuário.
+
+Além disso, implementamos uma verificação adicional no processo de descompactação para garantir a integridade dos arquivos recuperados.
+
+### Checklist
+
+- [x] Há uma rotina de compactação usando o algoritmo LZW para fazer backup dos arquivos?
+- [x] Há uma rotina de descompactação usando o algoritmo LZW para recuperação dos arquivos?
+- [x] O usuário pode escolher a versão a recuperar?
+- [ ] Qual foi a taxa de compressão alcançada por esse backup?
+- [x] O trabalho está funcionando corretamente?
+- [x] O trabalho está completo?
+- [x] O trabalho é original e não a cópia de um trabalho de um colega?
+
+Para mais detalhes sobre a implementação e os desafios enfrentados durante o projeto, consulte o código e os comentários inseridos no mesmo.
