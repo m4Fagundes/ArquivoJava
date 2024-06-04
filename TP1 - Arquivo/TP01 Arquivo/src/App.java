@@ -55,22 +55,14 @@ public class App {
         fileTeste.pesquisaPorPalavra("o universo em");
 
         String pastaEntrada = "TP1 - Arquivo/TP01 Arquivo/src/DataBase";
-        String pastaDeSaida = "TP1 - Arquivo/TP01 Arquivo/src/Backup";
-        String pastaDeSaidaDescompactada = "TP1 - Arquivo/TP01 Arquivo/src/BackupDescompactado";
-
-
-        //LZW.compactarPastaLZW(pastaEntrada, pastaDeSaida);
-        //LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
+        String pastaDeSaida = "TP1 - Arquivo/TP01 Arquivo/src/Backup";;
 
         // Cria um formato de data e hora para os backps
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String dataAtual = dateFormat.format(new Date());
         String pastaSaida = pastaDeSaida + "/" + dataAtual;
 
-        // Compacta a pasta
         LZW.compactarPastaLZW(pastaEntrada, pastaSaida);
-        // Descompacta a pasta
-        //LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
 
 
         Scanner scanner = new Scanner(System.in);
@@ -99,7 +91,7 @@ public class App {
 
         String pastaEscolhida = pastasBackup[escolha].getAbsolutePath();
 
-        String pastaDescompactadaSaida = "TP1 - Arquivo/TP01 Arquivo/src/BackupDescompactado"; // Caminho para a pasta de saída descompactada
+        String pastaDescompactadaSaida = "TP1 - Arquivo/TP01 Arquivo/src/BackupDescompactado";
 
         LZW.descompactarPastaLZW(pastaEscolhida, pastaDescompactadaSaida);
 
