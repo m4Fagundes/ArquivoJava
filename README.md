@@ -27,8 +27,7 @@ A classe LZW contém os métodos essenciais para compactação e descompactaçã
 
 ## Experiência do Grupo
 
-O grupo conseguiu implementar com sucesso o sistema de backup com LZW, incluindo a escolha dinâmica de pastas para descompactação. A lógica por trás da escolha da pasta de backup ajuda a tornar a recuperação de backups mais flexível e amigável para o usuário.
-
+O grupo conseguiu implementar com sucesso o sistema de backup com LZW, incluindo a escolha dinâmica de pastas para descompactação.
 Além disso, implementamos uma verificação adicional no processo de descompactação para garantir a integridade dos arquivos recuperados.
 
 ### Checklist
@@ -41,4 +40,3 @@ Além disso, implementamos uma verificação adicional no processo de descompact
 - [x] O trabalho está completo?
 - [x] O trabalho é original e não a cópia de um trabalho de um colega?
 
-Para mais detalhes sobre a implementação e os desafios enfrentados durante o projeto, consulte o código e os comentários inseridos no mesmo.
