@@ -1,6 +1,7 @@
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
+import java.util.Scanner;
 
 import models.*;
 import services.*;
@@ -69,7 +70,41 @@ public class App {
         // Compacta a pasta
         LZW.compactarPastaLZW(pastaEntrada, pastaSaida);
         // Descompacta a pasta
-        LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
+        //LZW.descompactarPastaLZW(pastaDeSaida, pastaDeSaidaDescompactada);
 
+
+        Scanner scanner = new Scanner(System.in);
+        String pastaBackup = "TP1 - Arquivo/TP01 Arquivo/src/Backup";
+
+        // Lista as pastas de backup disponíveis
+        File diretorioBackup = new File(pastaBackup);
+        File[] pastasBackup = diretorioBackup.listFiles(File::isDirectory);
+
+        if (pastasBackup == null || pastasBackup.length == 0) {
+            System.out.println("Nenhuma pasta de backup encontrada em " + pastaBackup);
+        }
+
+        System.out.println("Pastas de backup disponíveis:");
+
+        for (int i = 0; i < pastasBackup.length; i++) {
+            System.out.println(i + ": " + pastasBackup[i].getName());
+        }
+
+        System.out.print("Escolha o número da pasta de backup que deseja descompactar: ");
+        int escolha = scanner.nextInt();
+
+        if (escolha < 0 || escolha >= pastasBackup.length) {
+            System.out.println("Escolha inválida.");
+        }
+
+        String pastaEscolhida = pastasBackup[escolha].getAbsolutePath();
+
+        String pastaDescompactadaSaida = "TP1 - Arquivo/TP01 Arquivo/src/BackupDescompactado"; // Caminho para a pasta de saída descompactada
+
+        LZW.descompactarPastaLZW(pastaEscolhida, pastaDescompactadaSaida);
+
+        System.out.println("Pasta de backup descompactada em: " + pastaDescompactadaSaida);
+
+        scanner.close();
     }
 }
